@@ -75,8 +75,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
       
         features = np.concatenate(feature_list, axis=1)
         
-        labels = df['label'].values
-            
+        labels = df['label'].values.astype(np.int32)
+        
         return features,labels
    
     def run(self):
