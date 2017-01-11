@@ -5,6 +5,7 @@ from sklearn import cross_validation
 from sklearn.svm import SVC
 from sklearn import preprocessing
 from sklearn.pipeline import Pipeline
+from utility.dumpload import DumpLoad
 
 
 
@@ -30,6 +31,16 @@ class SVMModel(PrepareData):
 #         scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1')
         print("cross validation scores: means, {}, std, {}, details,{}".format(scores.mean(), scores.std(), scores))
         return  scores.mean()
+    def predict_sliding_window(self, img):
+        dump_load = DumpLoad('../data/smvmodel.pickle')
+        if not dump_load.isExisiting():
+            self.run_train_validation() 
+            dump_load.dump(self.estimator)
+        else:
+            self.estimator = dump_load.load()
+        features = self.extract_features(img)
+        res = self.estimator.predict(features.reshape(1,-1))
+        return res
     def run_train_validation(self):
         self.setClf()
         X_train,y_train,X_val,y_val = self.get_one_fold()
@@ -55,7 +66,8 @@ class SVMModel(PrepareData):
         
         print("train_f1: {}, validation_f1: {}".format(train_f1, validation_f1))
         
-        return
+        
+        return 
     
     
 

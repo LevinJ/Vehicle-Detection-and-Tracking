@@ -40,7 +40,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         features = []
         for fname in img_files:
             img = mpimg.imread(fname)
-            _, _, _, _, hist_features = self.color_hist(img, nbins=32, bins_range=(0, 256))
+            _, _, _, _, hist_features = self.color_hist(img)
             features.append(hist_features)
         features = np.asanyarray(features)
         dump_load.dump(features)
@@ -52,10 +52,28 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         features = []
         for fname in img_files:
             img = mpimg.imread(fname)
-            bs_features = self.bin_spatial(img, color_space='RGB', size=(32, 32))
+            bs_features = self.bin_spatial(img)
             features.append(bs_features)
         features = np.asanyarray(features)
         dump_load.dump(features)
+        return features
+    def extract_features(self, img):
+        
+        feature_list = []
+        if 'hog' in self.used_features:
+            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            hog_features = self.get_hog_features(gray)
+            feature_list.append(hog_features[:,np.newaxis])
+            
+        if 'color' in self.used_features:
+            color_hist_features = self.color_hist(img)
+            feature_list.append(color_hist_features[:,np.newaxis])
+        if 'raw' in self.used_features:
+            bs_features = self.bin_spatial(img)
+            feature_list.append(bs_features[:,np.newaxis])
+      
+        features = np.concatenate(feature_list, axis=1).squeeze()
+        
         return features
        
     def extract_features_labels(self):

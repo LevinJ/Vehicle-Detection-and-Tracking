@@ -15,7 +15,7 @@ class SlidingWindow(DrawBoundingBox):
     # start and stop positions in both x and y, 
     # window size (x and y dimensions),  
     # and overlap fraction (for both x and y)
-    def slide_window(self, img, x_start_stop=[None, None], y_start_stop=[None, None], 
+    def __get_slide_windows(self, img, x_start_stop=[None, None], y_start_stop=[None, None], 
                         xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
         # If x and/or y start/stop positions not defined, set to image size
         if x_start_stop[0] == None:
@@ -52,15 +52,17 @@ class SlidingWindow(DrawBoundingBox):
                 window_list.append(((startx, starty), (endx, endy)))
         # Return the list of windows
         return window_list
+    def get_sliding_windows(self, img):
+        windows = self.__get_slide_windows(img, x_start_stop=[None, None], y_start_stop=[None, None], 
+                    xy_window=(128, 128), xy_overlap=(0.5, 0.5))
+        return windows
    
    
     def run(self):
-#         fname = './test_images/test1.jpg'
-        fname = '../test1.jpg'
+        fname = '../data/test_images/test1.jpg'
         image = mpimg.imread(fname)
         # Add bounding boxes in this format, these are just example coordinates.
-        windows = self.slide_window(image, x_start_stop=[None, None], y_start_stop=[None, None], 
-                    xy_window=(128, 128), xy_overlap=(0.5, 0.5))
+        windows = self.get_sliding_windows(image)
                        
         window_img = self.draw_boxes(image, windows, color=(0, 0, 255), thick=6)                    
         plt.imshow(window_img)
