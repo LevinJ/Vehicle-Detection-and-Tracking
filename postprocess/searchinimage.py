@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from postprocess.sliding_window import SlidingWindow
 from implement.svmmodel import SVMModel
+from utility.vis_utils import visualize_grid,vis_grid
 
 
 
@@ -72,21 +73,30 @@ class SearchInImage(SlidingWindow, SVMModel):
     def run(self):
 #         fnames = ['./test_images/straight13.jpg','./test_images/straight14.jpg','./test_images/straight15.jpg',
 #                   './test_images/straight16.jpg','./test_images/straight17.jpg']
-        fnames = ['./test_images/test1.jpg','./test_images/test2.jpg','./test_images/test3.jpg','./test_images/test4.jpg',
-          './test_images/test5.jpg','./test_images/test6.jpg']
+#         fnames = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
+#           '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
+        fnames = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
+                  '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
+                  '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
+          '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['./test_images/challenge2.jpg']
-        fnames = ['../data/test_images/test5.jpg']
+#         fnames = ['../data/test_images/test5.jpg']
         
-
+        
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
             img = self.detect_cars(img)
+            plt.imshow(img)
             res_imgs.append(img)
+            
+        res_imgs = np.asarray(res_imgs)
+        res_imgs = vis_grid(res_imgs)
+            
          
-        res_imgs = self.stack_image_vertical(res_imgs)
+#         res_imgs = self.stack_image_vertical(res_imgs)
  
         
         plt.imshow(res_imgs)
