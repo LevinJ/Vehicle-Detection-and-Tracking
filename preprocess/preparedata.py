@@ -15,7 +15,7 @@ class PrepareData(PreprocessData):
         return
     def get_cv_folds(self):
         features,labels = self.extract_features_labels()
-        cv_indexes = StratifiedShuffleSplit(labels,n_iter=10, test_size=0.2)
+        cv_indexes = StratifiedShuffleSplit(labels,n_iter=5, test_size=0.2)
         return features, labels,cv_indexes
     
     def get_one_fold(self):

@@ -6,6 +6,8 @@ from sklearn.svm import SVC
 from sklearn import preprocessing
 from sklearn.pipeline import Pipeline
 from utility.dumpload import DumpLoad
+from sklearn.model_selection import GridSearchCV
+import numpy as np
 
 
 
@@ -13,19 +15,38 @@ class SVMModel(PrepareData):
 
     def __init__(self):
         PrepareData.__init__(self)
-        self.do_cross_val = False
+        self.do_grid_search = True
+        self.do_cross_val = True
+        
         return
     def setClf(self):
         estimator = SVC( kernel='linear', C=10)
         min_max_scaler = preprocessing.MinMaxScaler()
         self.estimator = Pipeline([('scaler', min_max_scaler), ('estimator', estimator)])
         return
+    def run_grid_search(self):
+        self.setClf()
+        features,labels,cv = self.get_cv_folds()
+        parameters = {'estimator__C':[0.01,0.1,0.5, 1, 10, 100,1000,10000]}
+        estimator = GridSearchCV(self.estimator, parameters, cv=cv,n_jobs=8, scoring='f1', verbose = 500)
+        estimator.fit(features, labels)
+        print('estimaator parameters: {}'.format(estimator.get_params))
+        print("cv reuslt{}".format(estimator.cv_results_ ))
+        print('Best parameters: {}'.format(estimator.best_params_))
+        print('Best Scores: {}'.format(estimator.best_score_))
+#         print('Score grid: {}'.format(estimator.grid_scores_ ))
+#         for i in estimator.grid_scores_ :
+#             print('parameters: {}'.format(i.parameters ))
+#             print('mean_validation_score: {}'.format(np.absolute(i.mean_validation_score)))
+#             print('cv_validation_scores: {}'.format(np.absolute(i.cv_validation_scores) ))
+#         return
 
   
     def run_croos_validation(self):
         self.setClf()
         features,labels,cv = self.get_cv_folds()
-        scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring=self.cv_scoring_mse)
+        scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1',n_jobs=4,
+                    verbose=100)
         
         #use recall as evaluation metrics
 #         scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1')
@@ -74,10 +95,14 @@ class SVMModel(PrepareData):
     
 
     def run(self):
-        if not self.do_cross_val:
-            self.run_train_validation()
+        if self.do_grid_search:
+            self.run_grid_search()
             return
-        self.run_croos_validation()
+        if self.do_cross_val:
+            self.run_croos_validation()
+            return
+        
+        self.run_train_validation()
         
         
 
