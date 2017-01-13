@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from postprocess.sliding_window import SlidingWindow
 from implement.svmmodel import SVMModel
 from utility.vis_utils import visualize_grid,vis_grid
+import datetime
 
 
 
@@ -52,13 +53,29 @@ class DetectionInImage(SlidingWindow, SVMModel):
         res_img = np.concatenate(imgs, axis=axis)
         return res_img
     def check_sliding_window(self,img, sliding_window):
+        roi_sclaed = self.__get_roi(img, sliding_window)
+        res = self.predict_sliding_window(roi_sclaed)
+        return res
+    def __get_roi(self, img, sliding_window):
         x1,y1 = sliding_window[0]
         x2,y2 = sliding_window[1]
         roi = img[y1:y2,x1:x2]
         roi_sclaed = cv2.resize(roi, (64,64))
-        res = self.predict_sliding_window(roi_sclaed)
-        return res
-    def process_image_RGB(self, img):
+        return roi_sclaed
+    def save_hard_samples(self,hard_samples_folder, img, car_windows,frame_num):
+        if hard_samples_folder is None:
+            return
+        count = 1
+        for car_windows in car_windows:
+            roi_sclaed = self.__get_roi(img, car_windows)
+            now = datetime.datetime.now()
+            now = now.strftime("%Y_%b_%d_%H_%m_%S_%f")
+#             fname = hard_samples_folder + now + '_' + str(count) + '_'+ '.png'
+            fname = hard_samples_folder + "_".join((str(frame_num), str(count), now)) + '.png'
+            mpimg.imsave(fname, roi_sclaed)
+            count += 1
+        return
+    def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None):
         #Get all sliding windows
         sliding_windows = self.get_sliding_windows(img)
         car_windows = []
@@ -66,7 +83,8 @@ class DetectionInImage(SlidingWindow, SVMModel):
             is_car = self.check_sliding_window(img, sliding_window)
             if is_car:
                 car_windows.append(sliding_window)
-        window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6)                    
+        window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6)  
+        self.save_hard_samples(hard_samples_folder, img, car_windows,frame_num)                  
         return window_img
     
     
@@ -82,13 +100,13 @@ class DetectionInImage(SlidingWindow, SVMModel):
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['./test_images/challenge2.jpg']
-#         fnames = ['../data/test_images/test5.jpg']
+        fnames = ['../data/test_images/car36.jpg']
         
         
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
-            img = self.process_image_RGB(img)
+            img = self.process_image_RGB(img, '../data/hard_samples/', 1)
             plt.imshow(img)
             res_imgs.append(img)
             

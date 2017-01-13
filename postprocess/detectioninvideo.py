@@ -25,7 +25,8 @@ class DetectionInVideo(DetectionInImage):
             
             print('frame {}'.format(self.count))
              
-            final_img = self.process_image_RGB(initial_img)
+            final_img = self.process_image_RGB(initial_img,'../data/hard_samples/', self.count)
+#             final_img = self.process_image_RGB(initial_img)
             
             self.count = self.count + 1
             plt.imshow(final_img)
