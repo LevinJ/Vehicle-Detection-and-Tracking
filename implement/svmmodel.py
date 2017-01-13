@@ -15,12 +15,12 @@ class SVMModel(PrepareData):
 
     def __init__(self):
         PrepareData.__init__(self)
-        self.do_grid_search = True
-        self.do_cross_val = True
+        self.do_grid_search = False
+        self.do_cross_val = False
         
         return
     def setClf(self):
-        estimator = SVC( kernel='linear', C=10)
+        estimator = SVC( kernel='linear', C=1)
         min_max_scaler = preprocessing.MinMaxScaler()
         self.estimator = Pipeline([('scaler', min_max_scaler), ('estimator', estimator)])
         return
@@ -34,6 +34,8 @@ class SVMModel(PrepareData):
         print("cv reuslt{}".format(estimator.cv_results_ ))
         print('Best parameters: {}'.format(estimator.best_params_))
         print('Best Scores: {}'.format(estimator.best_score_))
+        #Best parameters: {'estimator__C': 1}
+        #Best Scores: 0.9601237682619784
 #         print('Score grid: {}'.format(estimator.grid_scores_ ))
 #         for i in estimator.grid_scores_ :
 #             print('parameters: {}'.format(i.parameters ))
@@ -65,9 +67,11 @@ class SVMModel(PrepareData):
         res = self.estimator.predict(features.reshape(1,-1))
         return res[0]
     def run_train_validation(self):
+        dump_load = DumpLoad('../data/smvmodel.pickle')
         self.setClf()
         X_train,y_train,X_val,y_val = self.get_one_fold()
         self.estimator.fit(X_train,y_train)
+        dump_load.dump(self.estimator)
         
         y_train_pred = self.estimator.predict(X_train)
         y_val_pred = self.estimator.predict(X_val)
@@ -86,9 +90,9 @@ class SVMModel(PrepareData):
         # f1
         train_f1 = metrics.f1_score(y_train, y_train_pred)
         validation_f1 = metrics.f1_score(y_val, y_val_pred)
-        
+
         print("train_f1: {}, validation_f1: {}".format(train_f1, validation_f1))
-        
+
         
         return 
     

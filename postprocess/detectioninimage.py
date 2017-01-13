@@ -14,7 +14,7 @@ from utility.vis_utils import visualize_grid,vis_grid
 
 
 
-class SearchInImage(SlidingWindow, SVMModel):
+class DetectionInImage(SlidingWindow, SVMModel):
     def __init__(self):
         SlidingWindow.__init__(self)
         SVMModel.__init__(self)
@@ -58,7 +58,7 @@ class SearchInImage(SlidingWindow, SVMModel):
         roi_sclaed = cv2.resize(roi, (64,64))
         res = self.predict_sliding_window(roi_sclaed)
         return res
-    def detect_cars(self, img):
+    def process_image_RGB(self, img):
         #Get all sliding windows
         sliding_windows = self.get_sliding_windows(img)
         car_windows = []
@@ -88,7 +88,7 @@ class SearchInImage(SlidingWindow, SVMModel):
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
-            img = self.detect_cars(img)
+            img = self.process_image_RGB(img)
             plt.imshow(img)
             res_imgs.append(img)
             
@@ -106,5 +106,5 @@ class SearchInImage(SlidingWindow, SVMModel):
 
 
 if __name__ == "__main__":   
-    obj= SearchInImage()
+    obj= DetectionInImage()
     obj.run()
