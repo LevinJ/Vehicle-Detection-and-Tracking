@@ -1,13 +1,20 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath('..')) 
+sys.path.insert(0, os.path.abspath('../../')) 
+
 from preprocess.preparedata import PrepareData
 from sklearn import metrics
 
-from sklearn import cross_validation
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 from sklearn import preprocessing
 from sklearn.pipeline import Pipeline
 from utility.dumpload import DumpLoad
-from sklearn.model_selection import GridSearchCV
 import numpy as np
+from sklearn.decomposition import PCA
+from time import time
 
 
 
@@ -20,14 +27,15 @@ class SVMModel(PrepareData):
         
         return
     def setClf(self):
-        estimator = SVC( kernel='linear', C=0.8)
+        estimator = SVC( kernel='linear', C=0.1)
         min_max_scaler = preprocessing.MinMaxScaler()
-        self.estimator = Pipeline([('scaler', min_max_scaler), ('estimator', estimator)])
+        pca = PCA(n_components=0.90)
+        self.estimator = Pipeline([('pca', pca),('scaler', min_max_scaler), ('estimator', estimator)])
         return
     def run_grid_search(self):
         self.setClf()
         features,labels,cv = self.get_cv_folds()
-        parameters = {'estimator__C':[0.01,0.1,0.5, 1, 10, 100,1000,10000]}
+        parameters = {'estimator__C':[1,2,4,6,8,10,12,14]}
         estimator = GridSearchCV(self.estimator, parameters, cv=cv,n_jobs=8, scoring='f1', verbose = 500)
         estimator.fit(features, labels)
         print('estimaator parameters: {}'.format(estimator.get_params))
@@ -47,7 +55,7 @@ class SVMModel(PrepareData):
     def run_croos_validation(self):
         self.setClf()
         features,labels,cv = self.get_cv_folds()
-        scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1',n_jobs=4,
+        scores = cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1',n_jobs=4,
                     verbose=100)
         
         #use recall as evaluation metrics
@@ -67,14 +75,20 @@ class SVMModel(PrepareData):
         res = self.estimator.predict(features.reshape(1,-1))
         return res[0]
     def run_train_validation(self):
+        t0 = time()
         dump_load = DumpLoad('../data/smvmodel.pickle')
         self.setClf()
         X_train,y_train,X_val,y_val = self.get_one_fold()
+
         self.estimator.fit(X_train,y_train)
+        print("training time:", round(time()-t0, 3), "s")
         dump_load.dump(self.estimator)
         
+        
+        t0 = time()
         y_train_pred = self.estimator.predict(X_train)
         y_val_pred = self.estimator.predict(X_val)
+        print("prediction time:", round(time()-t0, 3), "s")
         
         # Precision
         train_precision = metrics.precision_score(y_train, y_train_pred)

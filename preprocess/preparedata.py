@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 
 from preprocess.preprocessdata import PreprocessData
-from sklearn.cross_validation import StratifiedShuffleSplit    
+from sklearn.model_selection import StratifiedShuffleSplit    
 
 
 class PrepareData(PreprocessData):    
@@ -15,15 +15,15 @@ class PrepareData(PreprocessData):
         return
     def get_cv_folds(self):
         features,labels = self.extract_features_labels()
-        cv_indexes = StratifiedShuffleSplit(labels,n_iter=5, test_size=0.2)
-        return features, labels,cv_indexes
+        ss = StratifiedShuffleSplit(n_splits=5, test_size=0.15)
+        return features, labels,ss.split(features, labels)
     
     def get_one_fold(self):
         features,labels = self.extract_features_labels()
-        cv_indexes = StratifiedShuffleSplit(labels,n_iter=2, test_size=0.2)
+        ss = StratifiedShuffleSplit(n_splits=2, test_size=0.15)
         folds = []
         used_foldid = 0
-        for train_index, test_index in cv_indexes:
+        for train_index, test_index in ss.split(features, labels):
             folds.append((train_index, test_index))
             break
        
