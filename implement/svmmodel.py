@@ -20,7 +20,7 @@ class SVMModel(PrepareData):
         
         return
     def setClf(self):
-        estimator = SVC( kernel='linear', C=1)
+        estimator = SVC( kernel='linear', C=0.8)
         min_max_scaler = preprocessing.MinMaxScaler()
         self.estimator = Pipeline([('scaler', min_max_scaler), ('estimator', estimator)])
         return
@@ -92,6 +92,11 @@ class SVMModel(PrepareData):
         validation_f1 = metrics.f1_score(y_val, y_val_pred)
 
         print("train_f1: {}, validation_f1: {}".format(train_f1, validation_f1))
+        
+        # acciracy
+        train_acc = metrics.accuracy_score(y_train, y_train_pred)
+        validation_acc= metrics.accuracy_score(y_val, y_val_pred)
+        print("train_precision: {}, validation_precision: {}".format(train_acc, validation_acc))
 
         
         return 

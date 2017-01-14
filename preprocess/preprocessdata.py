@@ -57,6 +57,20 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         features = np.asanyarray(features)
         dump_load.dump(features)
         return features
+    def extract_images(self):
+        dump_load = DumpLoad('../data/images.pickle')
+        if dump_load.isExisiting():
+            return dump_load.load()
+        features = []
+        df = pd.read_csv('../data/label.csv', index_col=0)
+        img_files = df['FileName']
+        for fname in img_files:
+            img = mpimg.imread(fname)
+            features.append(img)
+        features = np.asanyarray(features)
+        dump_load.dump((features, img_files.values))
+        return features, img_files.values
+
     def extract_features(self, img):
         
         feature_list = []
@@ -73,7 +87,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             feature_list.append(bs_features[:,np.newaxis])
       
         features = np.concatenate(feature_list, axis=1).squeeze()
-        
+         
         return features
        
     def extract_features_labels(self):
@@ -92,6 +106,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             feature_list.append(bs_features)
       
         features = np.concatenate(feature_list, axis=1)
+        
         
         labels = df['label'].values.astype(np.int32)
         

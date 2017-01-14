@@ -26,7 +26,9 @@ class VisualizeLabels():
     def show_img_labels(self):
         
         df = pd.read_csv('../data/label.csv')
-        img_files,labels = resample(df['FileName'], df['label'], n_samples=4)
+        inds = np.random.choice(len(df), 4)
+#         img_files,labels = resample(df['FileName'], df['label'], n_samples=4)
+        img_files,labels = df.iloc[inds]['FileName'], df.iloc[inds]['label']
         imgs = []
         for img_file in img_files:
             print(img_file)
@@ -35,8 +37,8 @@ class VisualizeLabels():
         return
         
     def run(self):
-        self.show_label_dist()
-#         self.show_img_labels()
+#         self.show_label_dist()
+        self.show_img_labels()
 
         
         plt.show()
