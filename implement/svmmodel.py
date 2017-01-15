@@ -8,7 +8,7 @@ from sklearn import metrics
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 from sklearn import preprocessing
 from sklearn.pipeline import Pipeline
 from utility.dumpload import DumpLoad
@@ -23,14 +23,15 @@ class SVMModel(PrepareData):
     def __init__(self):
         PrepareData.__init__(self)
         self.do_grid_search = False
-        self.do_cross_val = False
+        self.do_cross_val = True
         
         return
     def setClf(self):
-        estimator = SVC( kernel='linear', C=0.1)
-        min_max_scaler = preprocessing.MinMaxScaler()
+        estimator = LinearSVC(C=0.0003)
+        scaler = preprocessing.StandardScaler()
         pca = PCA(n_components=0.90)
-        self.estimator = Pipeline([('pca', pca),('scaler', min_max_scaler), ('estimator', estimator)])
+#         self.estimator = Pipeline([('pca', pca),('scaler', scaler), ('estimator', estimator)])
+        self.estimator = Pipeline([('scaler', scaler), ('estimator', estimator)])
         return
     def run_grid_search(self):
         self.setClf()
@@ -53,6 +54,7 @@ class SVMModel(PrepareData):
 
   
     def run_croos_validation(self):
+        t0 = time()
         self.setClf()
         features,labels,cv = self.get_cv_folds()
         scores = cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1',n_jobs=4,
@@ -61,6 +63,7 @@ class SVMModel(PrepareData):
         #use recall as evaluation metrics
 #         scores = cross_validation.cross_val_score(self.estimator, features, labels, cv=cv, scoring='f1')
         print("cross validation scores: means, {}, std, {}, details,{}".format(scores.mean(), scores.std(), scores))
+        print("training time:", round(time()-t0, 3), "s")
         return  scores.mean()
     def predict_sliding_window(self, img):
         dump_load = DumpLoad('../data/smvmodel.pickle')
@@ -75,11 +78,11 @@ class SVMModel(PrepareData):
         res = self.estimator.predict(features.reshape(1,-1))
         return res[0]
     def run_train_validation(self):
-        t0 = time()
+        
         dump_load = DumpLoad('../data/smvmodel.pickle')
         self.setClf()
         X_train,y_train,X_val,y_val = self.get_one_fold()
-
+        t0 = time()
         self.estimator.fit(X_train,y_train)
         print("training time:", round(time()-t0, 3), "s")
         dump_load.dump(self.estimator)
