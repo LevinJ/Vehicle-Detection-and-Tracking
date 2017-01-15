@@ -8,11 +8,13 @@ from preprocess.preparedata import PrepareData
 from sklearn import metrics
 from utility.confusionmatix import show_confusion_matrix
 from utility.vis_utils import vis_grid
+from postprocess.sliding_window import SlidingWindow
 
 class AnalyzePrediction(PrepareData):    
 
     def __init__(self):
         PrepareData.__init__(self)
+        SlidingWindow.__init__(self)
         return
     def __load_model(self):
         dump_load = DumpLoad('../data/smvmodel.pickle')
@@ -49,6 +51,8 @@ class AnalyzePrediction(PrepareData):
         
 #         alphabet = ['non-vehicle','vehicle']
 #         show_confusion_matrix(y, y_pred, alphabet)
+        return
+    def predict_roi(self):
         return
     
     

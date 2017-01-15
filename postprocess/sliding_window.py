@@ -3,6 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from postprocess.drawboundingbox import DrawBoundingBox
+from utility.vis_utils import vis_grid
 
 
 
@@ -53,19 +54,52 @@ class SlidingWindow(DrawBoundingBox):
         # Return the list of windows
         return window_list
     def get_sliding_windows(self, img):
-        windows = self.__get_slide_windows(img, x_start_stop=[None, None], y_start_stop=[None, None], 
-                    xy_window=(128, 128), xy_overlap=(0.5, 0.5))
+
+        window_configs = []
+        window_configs.append(((64*2, 64*2),[None, None], [320+64, 320 + 64*4] ))
+        window_configs.append(((40*2, 40*2),[None, None], [320+40*2, 320+ 40*4] ))
+        window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ))
+
+        windows = []
+        for window_config in window_configs:
+            xy_window, x_start_stop, y_start_stop = window_config
+            cur_windows = self.__get_slide_windows(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop, 
+                        xy_window=xy_window, xy_overlap=(0.5, 0.5))
+            windows.extend(cur_windows)
         return windows
    
    
     def run(self):
-        fname = '../data/test_images/test1.jpg'
-        image = mpimg.imread(fname)
-        # Add bounding boxes in this format, these are just example coordinates.
-        windows = self.get_sliding_windows(image)
+        fnames = []
+        #         fnames = ['./test_images/straight13.jpg','./test_images/straight14.jpg','./test_images/straight15.jpg',
+#                   './test_images/straight16.jpg','./test_images/straight17.jpg']
+        fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
+          '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
+        fnames_cars = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
+                  '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
+                  '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
+        '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg','../data/hard_frames/frame_1108.jpg']
+        
+#         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
+#           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
+        
+        
+        fnames.extend(fnames_test)
+        fnames.extend(fnames_cars)
+        fnames = ['../data/hard_frames/frame_1108.jpg']
+        res_imgs = []
+        for fname in fnames:
+            img = mpimg.imread(fname)
+            # Add bounding boxes in this format, these are just example coordinates.
+            windows = self.get_sliding_windows(img)       
+            window_img = self.draw_boxes(img, windows, color=(0, 0, 255), thick=6)     
+            res_imgs.append(window_img)
+            
+        
+        res_imgs = np.asarray(res_imgs)
+        res_imgs = vis_grid(res_imgs)
                        
-        window_img = self.draw_boxes(image, windows, color=(0, 0, 255), thick=6)                    
-        plt.imshow(window_img)
+        plt.imshow(res_imgs)
 
         plt.show()
 

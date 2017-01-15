@@ -26,7 +26,10 @@ class DetectionInVideo(DetectionInImage):
             print('frame {}'.format(self.count))
              
             final_img = self.process_image_RGB(initial_img,'../data/hard_samples/', self.count)
-#             final_img = self.process_image_RGB(initial_img)
+           
+            cv2.putText(final_img,"Frame " + str(self.count),(100,50), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
+
             
             self.count = self.count + 1
             plt.imshow(final_img)
@@ -67,25 +70,25 @@ class DetectionInVideo(DetectionInImage):
         white_clip.write_videofile(output_video, audio=False)
         return
     def test_on_frame(self):
-        clip = VideoFileClip('./project_video.mp4')
+        clip = VideoFileClip('../data/project_video.mp4')
         initial_img = None
         for img in clip.iter_frames():
-            if self.count == 1178:
+            if self.count == 1108:
                 initial_img = img
-                plt.imsave('exception_img.jpg', initial_img)
+                plt.imsave('../data/hard_frames/frame_1108.jpg', initial_img)
                 break
             else:
                 self.count = self.count + 1
             
-            
           
-        img_BGR = initial_img[...,::-1]
-          
-        final_img = self.process_image_RGB(img_BGR)
+        final_img = self.process_image_RGB(initial_img)
+        plt.imshow(final_img)
         
         return final_img
     def run(self):
         self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
+#         self.test_on_frame()
+        plt.show()
         
         return
 

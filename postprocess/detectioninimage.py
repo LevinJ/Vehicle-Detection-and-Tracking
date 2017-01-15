@@ -76,7 +76,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
             mpimg.imsave(fname, roi_sclaed)
             count += 1
         return
-    def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None):
+    def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None, Debug = False):
         #Get all sliding windows
         sliding_windows = self.get_sliding_windows(img)
         car_windows = []
@@ -84,31 +84,37 @@ class DetectionInImage(SlidingWindow, SVMModel):
             is_car = self.check_sliding_window(img, sliding_window)
             if is_car:
                 car_windows.append(sliding_window)
+            
         window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6)  
+        if Debug:
+            window_img = self.draw_boxes(window_img, sliding_windows, color=(255, 255, 255), thick=2)
         self.save_hard_samples(hard_samples_folder, img, car_windows,frame_num)                  
         return window_img
     
     
     def run(self):
         t0 = time()
+        fnames = []
 #         fnames = ['./test_images/straight13.jpg','./test_images/straight14.jpg','./test_images/straight15.jpg',
 #                   './test_images/straight16.jpg','./test_images/straight17.jpg']
-        fnames = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
+        fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
           '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
-#         fnames = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
-#                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
-#                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
-#           '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
+        fnames_cars = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
+                  '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
+                  '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
+          '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg','../data/hard_frames/frame_1108.jpg']
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
-#         fnames = ['./test_images/challenge2.jpg']
-#         fnames = ['../data/test_images/car36.jpg']
+#         fnames = ['../data/test_images/test4.jpg']
         
         
+        fnames.extend(fnames_test)
+        fnames.extend(fnames_cars)
+#         fnames = ['../data/hard_frames/frame_1108.jpg']
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
-            img = self.process_image_RGB(img, '../data/hard_samples/', 1)
+            img = self.process_image_RGB(img, '../data/hard_samples/', 1,Debug = False)
             plt.imshow(img)
             res_imgs.append(img)
             
