@@ -14,7 +14,7 @@ class AnalyzePrediction(PrepareData):
 
     def __init__(self):
         PrepareData.__init__(self)
-        SlidingWindow.__init__(self)
+#         SlidingWindow.__init__(self)
         return
     def __load_model(self):
         dump_load = DumpLoad('../data/smvmodel.pickle')

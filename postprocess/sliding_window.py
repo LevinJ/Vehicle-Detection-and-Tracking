@@ -56,15 +56,22 @@ class SlidingWindow(DrawBoundingBox):
     def get_sliding_windows(self, img):
 
         window_configs = []
-        window_configs.append(((64*2, 64*2),[None, None], [320+64, 320 + 64*4] ))
-        window_configs.append(((40*2, 40*2),[None, None], [320+40*2, 320+ 40*4] ))
-        window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ))
+        window_configs.append(((80*2, 60*2),[None, None], [320+80, 320 + 80*4] ,(0.5, 0.5)))
+        
+        window_configs.append(((40*2, 40*2),[None, None], [320+40, 320+ 40*4] ,(0.5, 0.5)))
+        window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ,(0.5, 0.5)))
+        
+        window_configs.append(((50*2, 40*2),[None, None], [320+50, 320+ 50*4] ,(0.5, 0.5)))
+        
+
+
+         
 
         windows = []
         for window_config in window_configs:
-            xy_window, x_start_stop, y_start_stop = window_config
+            xy_window, x_start_stop, y_start_stop,xy_overlap = window_config
             cur_windows = self.__get_slide_windows(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop, 
-                        xy_window=xy_window, xy_overlap=(0.5, 0.5))
+                        xy_window=xy_window, xy_overlap=xy_overlap)
             windows.extend(cur_windows)
         return windows
    
@@ -86,7 +93,7 @@ class SlidingWindow(DrawBoundingBox):
         
         fnames.extend(fnames_test)
         fnames.extend(fnames_cars)
-        fnames = ['../data/hard_frames/frame_1108.jpg']
+        fnames = ['../data/test_images/car50.jpg']
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)

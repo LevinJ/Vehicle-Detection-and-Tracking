@@ -96,15 +96,16 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
     def extract_features_labels(self):
         df = pd.read_csv('../data/label.csv', index_col=0)
         img_files = df['FileName']
-        hog_features = self.__extract_hog_features(img_files)
-        color_hist_features = self.__extract_color_hist_features(img_files)
-        bs_features = self.__extract_bin_spatialfeatures(img_files)
+        
         feature_list = []
         if 'hog' in self.used_features:
+            hog_features = self.__extract_hog_features(img_files)
             feature_list.append(hog_features)    
         if 'color' in self.used_features:
+            color_hist_features = self.__extract_color_hist_features(img_files)
             feature_list.append(color_hist_features)
         if 'raw' in self.used_features:
+            bs_features = self.__extract_bin_spatialfeatures(img_files)
             feature_list.append(bs_features)
            
         features = np.concatenate(feature_list, axis=1)

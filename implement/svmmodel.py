@@ -27,7 +27,7 @@ class SVMModel(PrepareData):
         
         return
     def setClf(self):
-        estimator = LinearSVC(C=0.004)
+        estimator = LinearSVC(C=0.0004)
         scaler = preprocessing.StandardScaler()
         pca = PCA(n_components=0.90)
 #         self.estimator = Pipeline([('pca', pca),('scaler', scaler), ('estimator', estimator)])
