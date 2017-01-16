@@ -23,7 +23,7 @@ class SVMModel(PrepareData):
     def __init__(self):
         PrepareData.__init__(self)
         self.do_grid_search = False
-        self.do_cross_val = True
+        self.do_cross_val = False
         
         return
     def setClf(self):

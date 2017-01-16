@@ -49,8 +49,8 @@ class AnalyzePrediction(PrepareData):
         
         
         
-#         alphabet = ['non-vehicle','vehicle']
-#         show_confusion_matrix(y, y_pred, alphabet)
+        alphabet = ['non-vehicle','vehicle']
+        show_confusion_matrix(y, y_pred, alphabet)
         return
     def predict_roi(self):
         return

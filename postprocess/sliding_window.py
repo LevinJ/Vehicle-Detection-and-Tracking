@@ -57,8 +57,8 @@ class SlidingWindow(DrawBoundingBox):
 
         window_configs = []
         window_configs.append(((64*2, 64*2),[None, None], [320+64, 320 + 64*4] ))
-#         window_configs.append(((40*2, 40*2),[None, None], [320+40*2, 320+ 40*4] ))
-#         window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ))
+        window_configs.append(((40*2, 40*2),[None, None], [320+40*2, 320+ 40*4] ))
+        window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ))
 
         windows = []
         for window_config in window_configs:
