@@ -49,11 +49,17 @@ class PredictRoi(DetectionInImage):
             self.refPt = []
             self.__predict(roi)
         elif event == cv2.EVENT_MOUSEMOVE:
-#             print(x,y)
             if not self.cropping:
                 return
+            x1,y1 = self.refPt[0]
+            x2,y2 = x,y
+            width = x2-x1
+            height = y2-y1
+            print('width: {}, height:{}, ratio {}'.format(width, height, width/float(height)))
             self.image = self.clone.copy()
             cv2.rectangle(self.image, self.refPt[0], (x,y), (255, 0, 0), 2)
+            roi = self.clone[y1:y2, x1:x2]
+            self.__predict(roi)
         return
     def __predict(self, roi):
         roi = cv2.resize(roi, (64,64))
@@ -96,9 +102,10 @@ class PredictRoi(DetectionInImage):
     def run(self):
       
         img_path = '../data/test_images/car29.jpg'
+        img_path = '../data/test_images/test6.jpg'
 #         img_path = '../data/hard_frames/frame_1108.jpg'
-        self.predict_roi(img_path)
-#         self.predict_img(img_path)
+#         self.predict_roi(img_path)
+        self.predict_img(img_path)
         
         
         
