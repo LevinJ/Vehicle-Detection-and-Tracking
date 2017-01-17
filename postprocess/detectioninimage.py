@@ -102,7 +102,9 @@ class DetectionInImage(SlidingWindow, SVMModel):
         fnames_cars = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
-          '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg','../data/hard_frames/frame_1108.jpg']
+          '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
+        fnames_smallcars = ['../data/hard_frames/frame_4.jpg','../data/hard_frames/frame_802.jpg','../data/hard_frames/frame_1108.jpg',
+                            '../data/hard_frames/frame_1238.jpg','../data/hard_frames/frame_1258.jpg',]
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['../data/test_images/test4.jpg']
@@ -110,11 +112,12 @@ class DetectionInImage(SlidingWindow, SVMModel):
         
         fnames.extend(fnames_test)
         fnames.extend(fnames_cars)
-#         fnames = ['../data/test_images/test3.jpg']
+#         fnames.extend(fnames_smallcars)
+#         fnames = ['../data/hard_frames/frame_1258.jpg']
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
-            img = self.process_image_RGB(img, '../data/hard_samples/', 1,Debug = False)
+            img = self.process_image_RGB(img, None, None,Debug = True)
             plt.imshow(img)
             res_imgs.append(img)
             
