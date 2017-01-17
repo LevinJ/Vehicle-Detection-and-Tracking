@@ -4,21 +4,22 @@ sys.path.insert(0, os.path.abspath('..'))
 
 from utility.dumpload import DumpLoad
 import cv2
+from preprocess.preparedata import PrepareData
+from postprocess.detectioninimage import DetectionInImage
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 
 
-class AnalyzePrediction():    
+class PredictRoi(DetectionInImage):    
 
     def __init__(self):
+        DetectionInImage.__init__(self)
         self.refPt = []
         self.cropping = False
 
         return
-    def __load_model(self):
-        dump_load = DumpLoad('../data/smvmodel.pickle')
-        self.model = dump_load.load()
-
-        return
+   
     def click_and_crop(self, event, x, y, flags, param):
         # grab references to the global variables
 
@@ -39,14 +40,30 @@ class AnalyzePrediction():
      
             # draw a rectangle around the region of interest
             cv2.rectangle(self.image, self.refPt[0], self.refPt[1], (0, 255, 0), 2)
+            x1,y1 = self.refPt[0]
+            x2,y2 = self.refPt[1]
+            width = x2-x1
+            height = y2-y1
+            print('width: {}, height:{}, ratio {}'.format(width, height, width/float(height)))
+            roi = self.clone[y1:y2, x1:x2]
             self.refPt = []
+            self.__predict(roi)
         elif event == cv2.EVENT_MOUSEMOVE:
-            print(x,y)
+#             print(x,y)
             if not self.cropping:
                 return
-            print('temp image')
             self.image = self.clone.copy()
             cv2.rectangle(self.image, self.refPt[0], (x,y), (255, 0, 0), 2)
+        return
+    def __predict(self, roi):
+        roi = cv2.resize(roi, (64,64))
+        roi = roi[...,::-1]
+        res = self.predict_sliding_window(roi)
+        if res ==1:
+            print("car")
+        else:
+            print("non car")
+        return
 
     def predict_roi(self, img_path):
         self.image = cv2.imread(img_path)
@@ -68,12 +85,20 @@ class AnalyzePrediction():
             elif key == ord("c"):
                 break
         return
+    def predict_img(self, img_path):
+        img = mpimg.imread(img_path)
+        img = self.process_image_RGB(img, None, None,Debug = True)
+        plt.imshow(img)
+        plt.show()
+        return
     
     
     def run(self):
-        self.__load_model()
-        img_path = '../data/test_images/test1.jpg'
+      
+        img_path = '../data/test_images/car29.jpg'
+#         img_path = '../data/hard_frames/frame_1108.jpg'
         self.predict_roi(img_path)
+#         self.predict_img(img_path)
         
         
         
@@ -84,5 +109,5 @@ class AnalyzePrediction():
 
 
 if __name__ == "__main__":   
-    obj= AnalyzePrediction()
+    obj= PredictRoi()
     obj.run()

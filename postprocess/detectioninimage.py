@@ -113,11 +113,11 @@ class DetectionInImage(SlidingWindow, SVMModel):
         fnames.extend(fnames_test)
         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
-#         fnames = ['../data/hard_frames/frame_1258.jpg']
+#         fnames = ['../data/test_images/car29.jpg']
         res_imgs = []
         for fname in fnames:
             img = mpimg.imread(fname)
-            img = self.process_image_RGB(img, None, None,Debug = True)
+            img = self.process_image_RGB(img, None, None,Debug = False)
             plt.imshow(img)
             res_imgs.append(img)
             
