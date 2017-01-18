@@ -39,7 +39,6 @@ class PredictRoi(DetectionInImage):
             self.cropping = False
      
             # draw a rectangle around the region of interest
-            cv2.rectangle(self.image, self.refPt[0], self.refPt[1], (0, 255, 0), 2)
             x1,y1 = self.refPt[0]
             x2,y2 = self.refPt[1]
             
@@ -50,23 +49,28 @@ class PredictRoi(DetectionInImage):
                 return
             x1,y1 = self.refPt[0]
             x2,y2 = x,y
-            self.image = self.clone.copy()
-            cv2.rectangle(self.image, self.refPt[0], (x,y), (255, 0, 0), 2)
+            
             self.__predict(x1,y1,x2,y2)
+            
+            
         return
     def __predict(self, x1,y1,x2,y2):
-        
+        self.image = self.clone.copy()
         width = x2-x1
         height = y2-y1
         print('width: {}, height:{}, ratio {}'.format(width, height, width/float(height)))
         roi = self.clone[y1:y2, x1:x2]
         roi = cv2.resize(roi, (64,64))
         roi = roi[...,::-1]
-        res = self.predict_sliding_window(roi)
-        if res ==1:
-            print("car {}:{}".format(y1,y2))
+        cv2.rectangle(self.image, (x1,y1), (x2,y2), (255, 0, 0), 2)
+        
+        score = self.predict_sliding_window(roi)
+        if score >=0:
+            cv2.putText(self.image,str(score),(100,50), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2)
+            print("car {}:{}, score {}".format(y1,y2, score))
         else:
-            print("non car")
+            print("non car, score {}".format(score))
+            cv2.putText(self.image,str(score),(100,50), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2)
         return
 
     def predict_roi(self, img_path):
@@ -101,7 +105,7 @@ class PredictRoi(DetectionInImage):
       
         img_path = '../data/test_images/car29.jpg'
         img_path = '../data/test_images/test3.jpg'
-#         img_path = '../data/hard_frames/frame_1108.jpg'
+        img_path = '../data/hard_frames/frame_1206.jpg'
 #         img_path = '../data/test_images/car30.jpg'
         self.predict_roi(img_path)
 #         self.predict_img(img_path)

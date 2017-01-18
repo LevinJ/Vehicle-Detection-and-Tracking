@@ -103,15 +103,18 @@ class DetectionInImage(SlidingWindow, SVMModel):
                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
           '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
-        fnames_smallcars = ['../data/hard_frames/frame_4.jpg','../data/hard_frames/frame_802.jpg','../data/hard_frames/frame_1108.jpg',
-                            '../data/hard_frames/frame_1238.jpg','../data/hard_frames/frame_1258.jpg',]
+        fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg',
+                            '../data/hard_frames/frame_338.jpg','../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg',
+                            '../data/hard_frames/frame_774.jpg','../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg',
+                            '../data/hard_frames/frame_1206.jpg']
+        hard_frames = []
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['../data/test_images/test4.jpg']
         
-        
-        fnames.extend(fnames_test)
-        fnames.extend(fnames_cars)
+        fnames.extend(fnames_hardframes)
+#         fnames.extend(fnames_test)
+#         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/test_images/car29.jpg']
         res_imgs = []

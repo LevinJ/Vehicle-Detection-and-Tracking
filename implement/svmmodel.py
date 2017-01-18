@@ -75,7 +75,7 @@ class SVMModel(PrepareData):
                 dump_load.dump(self.estimator)
 
         features = self.extract_features(img)
-        res = self.estimator.predict(features.reshape(1,-1))
+        res = self.estimator.decision_function(features.reshape(1,-1))
         return res[0]
     def run_train_validation(self):
         
