@@ -17,7 +17,7 @@ class SlidingWindow(DrawBoundingBox):
     # window size (x and y dimensions),  
     # and overlap fraction (for both x and y)
     def __get_slide_windows(self, img, x_start_stop=[None, None], y_start_stop=[None, None], 
-                        xy_window=(64, 64), xy_overlap=(10, 0.5)):
+                        xy_window=(64, 64), xy_overlap=(10, 5)):
         # If x and/or y start/stop positions not defined, set to image size
         if x_start_stop[0] == None:
             x_start_stop[0] = 0
@@ -27,59 +27,49 @@ class SlidingWindow(DrawBoundingBox):
             y_start_stop[0] = 0
         if y_start_stop[1] == None:
             y_start_stop[1] = img.shape[0]
-        # Compute the span of the region to be searched    
-#         xspan = x_start_stop[1] - x_start_stop[0]
-        yspan = y_start_stop[1] - y_start_stop[0]
-        # Compute the number of pixels per step in x/y
-#         nx_pix_per_step = np.int(xy_window[0]*(1 - xy_overlap[0]))
-        ny_pix_per_step = np.int(xy_window[1]*(1 - xy_overlap[1]))
-        # Compute the number of windows in x/y
-#         nx_windows = np.int(xspan/nx_pix_per_step) - 1
-        ny_windows = np.int(yspan/ny_pix_per_step) - 1
+        
         # Initialize a list to append window positions to
         window_list = []
         # Loop through finding x and y window positions
         # Note: you could vectorize this step, but in practice
         # you'll be considering windows one by one with your
         # classifier, so looping makes sense
-#         for ys in range(ny_windows):
-#             for xs in range(nx_windows):
-#                 # Calculate window position
-#                 startx = xs*nx_pix_per_step + x_start_stop[0]
-#                 endx = startx + xy_window[0]
-#                 starty = ys*ny_pix_per_step + y_start_stop[0]
-#                 endy = starty + xy_window[1]
-#                 # Append window position to list
-#                 window_list.append(((startx, starty), (endx, endy)))
-        nx_pix_per_step = xy_overlap[0]
-        endx = x_start_stop[1]
-        for ys in range(ny_windows):
-            while endx >= x_start_stop[0] + xy_window[0]:
-                # Calculate window position
-                
-                startx = endx - xy_window[0]
 
-                starty = ys*ny_pix_per_step + y_start_stop[0]
-                endy = starty + xy_window[1]
+        
+
+        window_width,window_height = xy_window
+        nx_pix_per_step,ny_pix_per_step  = xy_overlap
+        if nx_pix_per_step <= 1:
+            nx_pix_per_step = np.int(window_width*(1 - nx_pix_per_step))
+        if ny_pix_per_step <=1:
+            ny_pix_per_step = np.int(window_height*(1 - ny_pix_per_step))
+
+        y_start_pos, y_stop_pos  = y_start_stop
+        x_start_pos, x_stop_pos  = x_start_stop
+
+        
+        starty = y_start_pos
+        while starty <= y_stop_pos - window_height:
+            endy = starty + window_height
+            endx = x_stop_pos
+            #for a single starty:endy
+            while endx >= x_start_pos + window_width:
+                startx = endx - window_width
                 # Append window position to list
                 window_list.append(((startx, starty), (endx, endy)))
                 endx =  endx- nx_pix_per_step
+                
+            starty = starty + ny_pix_per_step
         # Return the list of windows
         return window_list
     def get_sliding_windows(self, img):
 
         window_configs = []
-        window_configs.append(((240, 120),[None, 1278], [390, 520] ,(10, 0.5)))
+        window_configs.append(((330, 188),[None, 1278], [390, 580] ,(20, 0.5)))
+        window_configs.append(((220, 120),[None, 1278], [390, 520] ,(20, 0.5)))
+        window_configs.append(((100, 62),[None, 1278], [408, 485] ,(15, 0.5)))
        
-#         window_configs.append(((80*2, 60*2),[None, None], [320+80, 320 + 80*4] ,(0.5, 0.5)))
-         
-#         window_configs.append(((40*2, 40*2),[None, None], [320+40, 320+ 40*4] ,(0.5, 0.5)))
-#         window_configs.append(((55*2, 55*2),[None, None], [320+55, 320+ 55*4] ,(0.5, 0.5)))
-#          
-#         window_configs.append(((50*2, 40*2),[None, None], [320+50, 320+ 50*4] ,(0.5, 0.5)))
-        
-#         window_configs.append(((10*2, 10*2),[None, None], [405, 440] ,(0.5, 0.5)))
-        
+
 
 
          
