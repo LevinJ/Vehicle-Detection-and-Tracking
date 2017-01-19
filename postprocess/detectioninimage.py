@@ -56,6 +56,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
     def check_sliding_window(self,img, sliding_window):
         roi_sclaed = self.__get_roi(img, sliding_window)
         res = self.predict_sliding_window(roi_sclaed)
+#         res = True if res >0 else False
         return res
     def __get_roi(self, img, sliding_window):
         x1,y1 = sliding_window[0]
@@ -80,12 +81,14 @@ class DetectionInImage(SlidingWindow, SVMModel):
         #Get all sliding windows
         sliding_windows = self.get_sliding_windows(img)
         car_windows = []
+        bboxes_scores = []
         for sliding_window in sliding_windows:
             is_car = self.check_sliding_window(img, sliding_window)
-            if is_car:
+            if is_car > 0:
                 car_windows.append(sliding_window)
+                bboxes_scores.append(is_car)
             
-        window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6)  
+        window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
         if Debug:
             window_img = self.draw_boxes(window_img, sliding_windows, color=(255, 255, 255), thick=2)
         self.save_hard_samples(hard_samples_folder, img, car_windows,frame_num)                  

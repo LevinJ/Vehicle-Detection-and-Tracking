@@ -69,7 +69,7 @@ class PredictRoi(DetectionInImage):
             cv2.putText(self.image,str(score),(100,50), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2)
             print("car {}:{}, score {}".format(y1,y2, score))
         else:
-            print("non car, score {}".format(score))
+            print("non car {}:{}, score {}".format(y1,y2,score))
             cv2.putText(self.image,str(score),(100,50), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2)
         return
 
@@ -95,7 +95,7 @@ class PredictRoi(DetectionInImage):
         return
     def predict_img(self, img_path):
         img = mpimg.imread(img_path)
-        img = self.process_image_RGB(img, None, None,Debug = True)
+        img = self.process_image_RGB(img, None, None,Debug = False)
         plt.imshow(img)
         plt.show()
         return
@@ -105,10 +105,10 @@ class PredictRoi(DetectionInImage):
       
         img_path = '../data/test_images/car29.jpg'
         img_path = '../data/test_images/test3.jpg'
-        img_path = '../data/hard_frames/frame_1206.jpg'
+        img_path = '../data/hard_frames/frame_952.jpg'
 #         img_path = '../data/test_images/car30.jpg'
-        self.predict_roi(img_path)
-#         self.predict_img(img_path)
+#         self.predict_roi(img_path)
+        self.predict_img(img_path)
         
         
         

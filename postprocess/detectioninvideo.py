@@ -85,8 +85,8 @@ class DetectionInVideo(DetectionInImage):
         
         return final_img
     def run(self):
-#         self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
-        self.test_on_frame()
+        self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
+#         self.test_on_frame()
         plt.show()
         
         return
