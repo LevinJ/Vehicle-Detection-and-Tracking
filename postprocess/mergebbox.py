@@ -42,7 +42,19 @@ class MergeBBox(object):
                 
         return new_bboxes,new_bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores):
+        if len(bboxes_scores) == 0:
+            return bboxes,bboxes_scores 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
+        bboxes_rec = []   
+        for bbox in bboxes:
+            bboxes_rec.append([item for pt in bbox for item in pt])
+        bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 1, 0.2)
+        bboxes_scores = bboxes_scores.ravel()
+        bboxes=[]
+        for bbox_rec in bboxes_rec:
+            x1,y1,x2,y2 = bbox_rec
+            bboxes.append(((x1,y1),(x2,y2 )))
+         
         return bboxes,bboxes_scores
     
     
