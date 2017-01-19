@@ -94,13 +94,18 @@ class DetectionInImage(SlidingWindow, SVMModel):
         if Debug:
             img_bouding_box = self.draw_boxes(img_bouding_box, sliding_windows, color=(255, 255, 255), thick=2)
         
-        #image after merging
-        bboxes,bboxes_scores = g_mbbx.merge_bbox(img, bboxes,bboxes_scores)    
+        
+        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        
+        #filtered image
+        filtered_img = img.copy() 
+        filtered_img = self.draw_boxes(filtered_img, filtered_bboxes, color=(0, 0, 255), thick=6, bboxes_scores = filtered_bboxes_scores)  
+        #image after merging  
         img_merged = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
         
         self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
         
-        right_side = self.stack_image_vertical([img,img_bouding_box])
+        right_side = self.stack_image_horizontal([img,img_bouding_box,filtered_img])
         left_side = img_merged
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
                      

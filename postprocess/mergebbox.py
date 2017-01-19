@@ -9,10 +9,12 @@ class MergeBBox(object):
         sliding_windows = {}
         sliding_windows[(64,64)]= {'config': (([None, None],[330, 720], [32, 32])), 
                                    'thres': 0.0}
+ 
         sliding_windows[(128,128)]= {'config': (([None, None],[330, 720], [32, 32])), 
-                                   'thres': 0.0}
-#         sliding_windows[(192,192)]= {'config': (([None, None],[330, 720], [32, 32])), 
-#                                    'thres': 0.0}
+                                   'thres': 0.5}
+        sliding_windows[(192,100)]= {'config': (([None, None],[330, 720], [32, 32])), 
+                                   'thres': 1.0}
+
         self.sliding_windows = sliding_windows
         self.sliding_windows_config = self.parse_sliding_window_configs()
 
@@ -44,18 +46,26 @@ class MergeBBox(object):
     def merge_bbox(self, img, bboxes,bboxes_scores):
         if len(bboxes_scores) == 0:
             return bboxes,bboxes_scores 
-        bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
+        filtered_bboxes,filtered_bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         bboxes_rec = []   
-        for bbox in bboxes:
+        for bbox in filtered_bboxes:
             bboxes_rec.append([item for pt in bbox for item in pt])
         bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 1, 0.2)
+        
+        
         bboxes_scores = bboxes_scores.ravel()
         bboxes=[]
-        for bbox_rec in bboxes_rec:
+        print("merged bouding boxes")
+        for i in range(len(bboxes_scores)):
+            bbox_rec = bboxes_rec[i]
             x1,y1,x2,y2 = bbox_rec
+            score = bboxes_scores[i]
+            size = (x2-x1,y2-y1)
+            
+            print("size {}: score {:.2f}, pos{}".format(size, score, ((x1,y1),(x2,y2 ))))
             bboxes.append(((x1,y1),(x2,y2 )))
          
-        return bboxes,bboxes_scores
+        return bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores
     
     
 
