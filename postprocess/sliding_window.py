@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from postprocess.drawboundingbox import DrawBoundingBox
 from utility.vis_utils import vis_grid
+from mergebbox import g_mbbx
 
 
 
@@ -64,11 +65,13 @@ class SlidingWindow(DrawBoundingBox):
         return window_list
     def get_sliding_windows(self, img):
 
-        window_configs = []
+        window_configs = g_mbbx.sliding_windows_config
 #         window_configs.append(((330, 188),[None, 1278], [390, 580] ,(20, 0.5)))
 #         window_configs.append(((220, 120),[None, 1278], [390, 520] ,(20, 0.5)))
 #         window_configs.append(((100, 62),[None, 1278], [408, 485] ,(15, 0.5)))
-        window_configs.append(((64, 64),[None, None], [390, 720] ,(32, 32)))
+#         window_configs.append(((64, 64),[None, None], [330, 720] ,(32, 32)))
+#         window_configs.append(((128, 128),[None, None], [330, 720] ,(32, 16)))
+#         window_configs.append(((192, 192),[None, None], [330, 720] ,(32, 16)))
        
 
 

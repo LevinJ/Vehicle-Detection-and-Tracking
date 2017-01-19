@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 class DrawBoundingBox(object):
     def __init__(self):
         return
-    def draw_boxes(self, img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = None):
+    def draw_boxes(self, img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = []):
         # make a copy of the image
         draw_img = np.copy(img)
         # draw each bounding box on your image copy using cv2.rectangle()

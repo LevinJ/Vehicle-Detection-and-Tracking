@@ -13,6 +13,7 @@ from implement.svmmodel import SVMModel
 from utility.vis_utils import visualize_grid,vis_grid
 import datetime
 from time import time
+from postprocess.mergebbox import g_mbbx
 
 
 
@@ -80,18 +81,18 @@ class DetectionInImage(SlidingWindow, SVMModel):
     def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None, Debug = False):
         #Get all sliding windows
         sliding_windows = self.get_sliding_windows(img)
-        car_windows = []
+        bboxes = []
         bboxes_scores = []
         for sliding_window in sliding_windows:
             is_car = self.check_sliding_window(img, sliding_window)
             if is_car > 0:
-                car_windows.append(sliding_window)
+                bboxes.append(sliding_window)
                 bboxes_scores.append(is_car)
-            
-        window_img = self.draw_boxes(img, car_windows, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
+        bboxes,bboxes_scores = g_mbbx.merge_bbox(img, bboxes,bboxes_scores)    
+        window_img = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
         if Debug:
             window_img = self.draw_boxes(window_img, sliding_windows, color=(255, 255, 255), thick=2)
-        self.save_hard_samples(hard_samples_folder, img, car_windows,frame_num)                  
+        self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)                  
         return window_img
     
     
