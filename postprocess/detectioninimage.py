@@ -95,7 +95,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
             img_bouding_box = self.draw_boxes(img_bouding_box, sliding_windows, color=(255, 255, 255), thick=2)
         
         
-        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,heat_map = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
         #filtered image
         filtered_img = img.copy() 
@@ -105,7 +105,8 @@ class DetectionInImage(SlidingWindow, SVMModel):
         
         self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
         
-        right_side = self.stack_image_horizontal([img,img_bouding_box,filtered_img])
+#         right_side = self.stack_image_horizontal([img,img_bouding_box,filtered_img])
+        right_side = self.stack_image_horizontal([filtered_img])
         left_side = img_merged
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
                      
