@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from preprocess.spatial_bin import SpatialBin
 from preprocess.color_histogram import ColorHistogram
 import pandas as pd
@@ -26,8 +25,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             return dump_load.load()
         features = []
         for fname in img_files:
-            img = mpimg.imread(fname)
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            img = cv2.imread(fname)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             feature = self.get_hog_features(gray)
             features.append(feature)
         features = np.asanyarray(features)
@@ -39,8 +38,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             return dump_load.load()
         features = []
         for fname in img_files:
-            img = mpimg.imread(fname)
-            hls_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS) 
+            img = cv2.imread(fname)
+            hls_image = cv2.cvtColor(img, cv2.COLOR_BGR2HLS) 
             _, _, _, _, hist_features = self.color_hist(hls_image)
             features.append(hist_features)
         features = np.asanyarray(features)
@@ -52,8 +51,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             return dump_load.load()
         features = []
         for fname in img_files:
-            img = mpimg.imread(fname)
-            hls_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS) 
+            img = cv2.imread(fname)
+            hls_image = cv2.cvtColor(img, cv2.COLOR_BGR2HLS) 
             bs_features = self.bin_spatial(hls_image)
             features.append(bs_features)
         features = np.asanyarray(features)
@@ -67,7 +66,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         df = pd.read_csv('../data/label.csv', index_col=0)
         img_files = df['FileName']
         for fname in img_files:
-            img = mpimg.imread(fname)
+            img = cv2.imread(fname)
+            img = img[...,::-1]
             features.append(img)
         features = np.asanyarray(features)
         dump_load.dump((features, img_files.values))
