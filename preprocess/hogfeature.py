@@ -23,8 +23,8 @@ class HOGFeature(object):
         # Otherwise call with one output
         else:      
             features = hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
-                           cells_per_block=(cell_per_block, cell_per_block), 
-                           visualise=vis)
+                           cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=True,
+                           visualise=vis, feature_vector=feature_vec)
             return features
    
     def run(self):

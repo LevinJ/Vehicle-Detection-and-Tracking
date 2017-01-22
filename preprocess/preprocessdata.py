@@ -43,10 +43,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         img = cv2.imread(fname)
         img = img[...,::-1]
         return self.extract_features(img)
-
-    def extract_features(self, rgb_img):
-        #assume the input image is of RGB
-        feature_list = []
+    def __extract_hog_spatial_color(self, rgb_img, feature_list):
         if 'hog' in self.used_features:
             gray = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2GRAY)
             hog_features = self.get_hog_features(gray)
@@ -60,7 +57,21 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         if 'spatial' in self.used_features:
             bs_features = self.bin_spatial(rgb_img)
             feature_list.append(bs_features)
-      
+        return 
+    def __extract_lab_hog(self, rgb_img, feature_list):
+        img_lab = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2LAB)
+    
+        feature_list.append(self.get_hog_features(img_lab[:,:,0]))
+        feature_list.append(self.get_hog_features(img_lab[:,:,1]))
+        feature_list.append(self.get_hog_features(img_lab[:,:,2]))
+        
+        return
+
+    def extract_features(self, rgb_img):
+        #assume the input image is of RGB
+        feature_list = []
+        self.__extract_lab_hog(rgb_img, feature_list)
+#         self.__extract_hog_spatial_color(rgb_img, feature_list)
         features = np.concatenate(feature_list)
          
         return features
