@@ -8,6 +8,7 @@ import pandas as pd
 from preprocess.hogfeature import HOGFeature
 from utility.dumpload import DumpLoad
 import os
+from time import time
 
 
 
@@ -18,8 +19,8 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         ColorHistogram.__init__(self)
         HOGFeature.__init__(self)
         self.feature_pickle = '../data/features.pickle'
-#         self.used_features = ['hog', 'color', 'raw']
-        self.used_features = ['hog']
+#         self.used_features = ['hog', 'color', 'spatial']
+        self.used_features = ['hog', 'spatial', 'color']
         self.label = 'label'
         return
     
@@ -56,7 +57,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             _, _, _, _, color_hist_features = self.color_hist(hls_image)
             feature_list.append(color_hist_features)
             
-        if 'raw' in self.used_features:
+        if 'spatial' in self.used_features:
             bs_features = self.bin_spatial(rgb_img)
             feature_list.append(bs_features)
       
@@ -70,6 +71,7 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         dump_load = DumpLoad(self.feature_pickle)
         if dump_load.isExisiting():
             return dump_load.load()
+        t0 = time()
         df = pd.read_csv('../data/label.csv', index_col=0)
         img_files = df['FileName']
         
@@ -82,7 +84,9 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         labels = df['label'].values.astype(np.int32)
         
         res = (features,labels)
-        dump_load.dump(res)   
+        dump_load.dump(res)  
+        print("save to {}".format(self.feature_pickle))
+        print("extract features time:", round(time()-t0, 3), "s") 
         return res
    
     def run(self):

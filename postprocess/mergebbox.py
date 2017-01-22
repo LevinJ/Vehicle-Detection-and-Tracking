@@ -49,19 +49,19 @@ class HeatMap(object):
 class MergeBBox():
     def __init__(self):
         sliding_windows = {}
-        sliding_windows[(110,60)]= {'config': (([640, None],[400, 480], [8, 16])),
-                           'thres': 1}
-        sliding_windows[(254,130)]= {'config': (([640, 1276],[391, 525], [2, 6])),
-                                   'thres': 1}
-#         sliding_windows[(80,80)]= {'config': (([None, None],[330, 720], [2, 2])),
+#         sliding_windows[(110,60)]= {'config': (([640, None],[400, 480], [8, 16])),
+#                            'thres': 0}
+#         sliding_windows[(254,130)]= {'config': (([640, 1276],[391, 525], [2, 6])),
 #                                    'thres': 1}
-#         sliding_windows[(96,96)]= {'config': (([None, None],[330, 720], [2, 2])),
-#                                    'thres': 1}
-#         sliding_windows[(102,102)]= {'config': (([None, None],[330, 720], [2, 2])),
-#                                    'thres': 1}
+        sliding_windows[(80,40)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
+                                   'thres': 0}
+        sliding_windows[(96,48)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
+                                   'thres': 0}
+        sliding_windows[(102,50)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
+                                   'thres': 0}
 #    
-#         sliding_windows[(128,128)]= {'config': (([None, None],[330, 720], [2, 2])),
-#                                    'thres': 1}
+        sliding_windows[(64,64)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
+                                   'thres': 0}
 #         sliding_windows[(256,256)]= {'config': (([None, None],[330, 720], [128, 128])),
 #                                    'thres': 1}
 

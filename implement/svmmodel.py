@@ -29,7 +29,7 @@ class SVMModel(PrepareData):
     def setClf(self):
         estimator = LinearSVC(C=0.001)
         scaler = preprocessing.StandardScaler()
-        pca = PCA(n_components=0.90)
+#         pca = PCA(n_components=0.95)
 #         self.estimator = Pipeline([('pca', pca),('scaler', scaler), ('estimator', estimator)])
         self.estimator = Pipeline([('scaler', scaler), ('estimator', estimator)])
         return
@@ -82,7 +82,12 @@ class SVMModel(PrepareData):
         dump_load = DumpLoad('../data/smvmodel.pickle')
         self.setClf()
         X_train,y_train,X_val,y_val = self.get_one_fold()
+#         pca = PCA(n_components=0.90)
+#         pca.fit(X_train, y_train)
+#         X_train = pca.transform(X_train)
+#         X_val = pca.transform(X_val)
         t0 = time()
+        print("start trainng ...")
         self.estimator.fit(X_train,y_train)
         print("training time:", round(time()-t0, 3), "s")
         dump_load.dump(self.estimator)
