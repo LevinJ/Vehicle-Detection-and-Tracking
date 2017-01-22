@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from postprocess.drawboundingbox import DrawBoundingBox
 from utility.vis_utils import vis_grid
-from mergebbox import g_mbbx
+from postprocess.mergebbox import g_mbbx
 
 
 

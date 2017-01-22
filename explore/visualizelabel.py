@@ -37,8 +37,8 @@ class VisualizeLabels():
         return
         
     def run(self):
-#         self.show_label_dist()
-        self.show_img_labels()
+        self.show_label_dist()
+#         self.show_img_labels()
 
         
         plt.show()

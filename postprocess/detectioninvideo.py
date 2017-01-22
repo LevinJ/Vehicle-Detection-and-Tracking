@@ -25,7 +25,7 @@ class DetectionInVideo(DetectionInImage):
             
             print('frame {}'.format(self.count))
              
-            final_img = self.process_image_RGB(initial_img,None, self.count)
+            final_img,_ = self.process_image_RGB(initial_img,None, self.count)
            
             cv2.putText(final_img,"Frame " + str(self.count),(100,50), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)

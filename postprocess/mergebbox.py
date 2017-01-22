@@ -49,13 +49,21 @@ class HeatMap(object):
 class MergeBBox():
     def __init__(self):
         sliding_windows = {}
-        sliding_windows[(64,64)]= {'config': (([None, None],[330, 720], [32, 32])), 
-                                   'thres': 0.0}
-  
-        sliding_windows[(128,128)]= {'config': (([None, None],[330, 720], [32, 32])), 
-                                   'thres': 0.5}
-        sliding_windows[(192,100)]= {'config': (([None, None],[330, 720], [32, 32])), 
-                                   'thres': 1.0}
+        sliding_windows[(110,60)]= {'config': (([640, None],[400, 480], [8, 16])),
+                           'thres': 1}
+        sliding_windows[(254,130)]= {'config': (([640, 1276],[391, 525], [2, 6])),
+                                   'thres': 1}
+#         sliding_windows[(80,80)]= {'config': (([None, None],[330, 720], [2, 2])),
+#                                    'thres': 1}
+#         sliding_windows[(96,96)]= {'config': (([None, None],[330, 720], [2, 2])),
+#                                    'thres': 1}
+#         sliding_windows[(102,102)]= {'config': (([None, None],[330, 720], [2, 2])),
+#                                    'thres': 1}
+#    
+#         sliding_windows[(128,128)]= {'config': (([None, None],[330, 720], [2, 2])),
+#                                    'thres': 1}
+#         sliding_windows[(256,256)]= {'config': (([None, None],[330, 720], [2, 2])),
+#                                    'thres': 1}
 
         self.sliding_windows = sliding_windows
         self.sliding_windows_config = self.parse_sliding_window_configs()
@@ -64,7 +72,7 @@ class MergeBBox():
     def parse_sliding_window_configs(self):
         config = []
         
-        for size, v in self.sliding_windows.iteritems():
+        for size, v in self.sliding_windows.items():
             item = []
             item.append(size)
             item .extend(v['config'])
@@ -87,11 +95,12 @@ class MergeBBox():
         return new_bboxes,new_bboxes_scores
     def __get_bbox_groupRec(self,bboxes_rec ):
         bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 1, 0.2)
-        bboxes_scores = bboxes_scores.ravel()
+        if len(bboxes_scores) != 0:
+            bboxes_scores = bboxes_scores.ravel()
         return bboxes_rec,bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores):
         if len(bboxes_scores) == 0:
-            return bboxes,bboxes_scores 
+            return bboxes,bboxes_scores,(),(),None
         filtered_bboxes,filtered_bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         bboxes_rec = []   
         for bbox in filtered_bboxes:

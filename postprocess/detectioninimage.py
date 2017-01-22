@@ -80,6 +80,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
         return
     def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None, Debug = False):
         #Get all sliding windows
+        t0 = time()
         sliding_windows = self.get_sliding_windows(img)
         bboxes = []
         bboxes_scores = []
@@ -95,7 +96,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
             img_bouding_box = self.draw_boxes(img_bouding_box, sliding_windows, color=(255, 255, 255), thick=2)
         
         
-        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,heat_map = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,_ = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
         #filtered image
         filtered_img = img.copy() 
@@ -105,12 +106,12 @@ class DetectionInImage(SlidingWindow, SVMModel):
         
         self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
         
-#         right_side = self.stack_image_horizontal([img,img_bouding_box,filtered_img])
-        right_side = self.stack_image_horizontal([filtered_img])
+        right_side = self.stack_image_horizontal([img_bouding_box,filtered_img])
+
         left_side = img_merged
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
-                     
-        return img_final
+        print("processing time:", round(time()-t0, 3), "s")
+        return img_final,left_side
     
     
     def run(self):
@@ -124,9 +125,9 @@ class DetectionInImage(SlidingWindow, SVMModel):
                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
           '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
-        fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg',
-                            '../data/hard_frames/frame_338.jpg','../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg',
-                            '../data/hard_frames/frame_774.jpg','../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg',
+        fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg','../data/hard_frames/frame_338.jpg',
+                            '../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg','../data/hard_frames/frame_774.jpg',
+                            '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg',
                             '../data/hard_frames/frame_1206.jpg']
         hard_frames = []
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
@@ -139,16 +140,21 @@ class DetectionInImage(SlidingWindow, SVMModel):
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/test_images/car29.jpg']
         res_imgs = []
+        res_imgs_2 = []
         for fname in fnames:
+            print(fname)
             img = mpimg.imread(fname)
-            img_final = self.process_image_RGB(img, None, None,Debug = False)
-            res_imgs.append(img)
+            img_final,left_side = self.process_image_RGB(img, None, None,Debug = False)
+            res_imgs.append(img_final)
+            res_imgs_2.append(left_side)
             
         print("prediction time:", round(time()-t0, 3), "s")
        
             
          
-        res_imgs = self.stack_image_vertical(res_imgs)
+#         res_imgs = self.stack_image_vertical(res_imgs)
+        
+        res_imgs = vis_grid(np.asarray(res_imgs_2))
  
         
         plt.imshow(res_imgs)
