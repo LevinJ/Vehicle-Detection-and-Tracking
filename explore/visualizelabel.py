@@ -18,6 +18,7 @@ class VisualizeLabels():
         df = pd.read_csv('../data/label.csv')
         groups = df.groupby(['label'])
         print(groups['FileName'].count())
+        print("overall size {}".format(len(df)))
 #         for name, group in groups:
 #             print(name)
 #             print(group)
