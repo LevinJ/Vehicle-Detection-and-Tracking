@@ -62,7 +62,7 @@ class MergeBBox():
 #    
 #         sliding_windows[(128,128)]= {'config': (([None, None],[330, 720], [2, 2])),
 #                                    'thres': 1}
-#         sliding_windows[(256,256)]= {'config': (([None, None],[330, 720], [2, 2])),
+#         sliding_windows[(256,256)]= {'config': (([None, None],[330, 720], [128, 128])),
 #                                    'thres': 1}
 
         self.sliding_windows = sliding_windows
