@@ -66,6 +66,11 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
         feature_list.append(self.get_hog_features(img_lab[:,:,2]))
         
         return
+    def extract_lab_hog_mulit_dimenstion(self, rgb_img):
+        feature_list = []
+        hog = self.__extract_lab_hog(rgb_img, feature_list)
+        hog = np.concatenate([feature_list[0].reshape(-1,1),feature_list[1].reshape(-1,1),feature_list[2].reshape(-1,1)], axis = 0)
+        return hog
 
     def extract_features(self, rgb_img):
         #assume the input image is of RGB
