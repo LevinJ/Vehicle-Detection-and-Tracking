@@ -14,13 +14,15 @@ from utility.vis_utils import visualize_grid,vis_grid
 import datetime
 from time import time
 from postprocess.mergebbox import g_mbbx
+from postprocess.pyramidhog import PyramidHog
 
 
 
-class DetectionInImage(SlidingWindow, SVMModel):
+class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
     def __init__(self):
         SlidingWindow.__init__(self)
         SVMModel.__init__(self)
+        PyramidHog.__init__(self)
         return
     def stack_image_horizontal(self, imgs, max_img_width = None, max_img_height=None):
         return self.__stack_image_horizontal(imgs, axis = 1, max_img_width = max_img_width, max_img_height=max_img_height)
@@ -78,9 +80,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
             mpimg.imsave(fname, roi_sclaed)
             count += 1
         return
-    def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None, Debug = False):
-        #Get all sliding windows
-        t0 = time()
+    def __predict_img_1(self, img):
         sliding_windows = self.get_sliding_windows(img)
         bboxes = []
         bboxes_scores = []
@@ -89,24 +89,35 @@ class DetectionInImage(SlidingWindow, SVMModel):
             if is_car > 0:
                 bboxes.append(sliding_window)
                 bboxes_scores.append(is_car)
+        return bboxes,bboxes_scores
+    def __predict_img_2(self, rgb_img):
+        windows, features = self.get_window_feature(rgb_img)
+        bboxes_scores = self.predict_feature_batch(features)
+        cars = bboxes_scores > 0
+        
+        return windows[cars],bboxes_scores[cars]
+    def process_image_RGB(self, img, hard_samples_folder = None, frame_num = None, Debug = False):
+        #Get all sliding windows
+        t0 = time()
+        bboxes,bboxes_scores = self.__predict_img_2(img)
+        print(bboxes_scores)
         #initial boudning box
-        img_bouding_box = img.copy()
-        img_bouding_box = self.draw_boxes(img_bouding_box, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
-        if Debug:
-            img_bouding_box = self.draw_boxes(img_bouding_box, sliding_windows, color=(255, 255, 255), thick=2)
+#         img_bouding_box = img.copy()
+#         img_bouding_box = self.draw_boxes(img_bouding_box, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
+       
         
         
-        bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,_ = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+#         bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,_ = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
         #filtered image
-        filtered_img = img.copy() 
-        filtered_img = self.draw_boxes(filtered_img, filtered_bboxes, color=(0, 0, 255), thick=6, bboxes_scores = filtered_bboxes_scores)  
+#         filtered_img = img.copy() 
+#         filtered_img = self.draw_boxes(filtered_img, filtered_bboxes, color=(0, 0, 255), thick=6, bboxes_scores = filtered_bboxes_scores)  
         #image after merging  
         img_merged = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
         
-        self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
+#         self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
         
-        right_side = self.stack_image_horizontal([img_bouding_box,filtered_img])
+        right_side = self.stack_image_horizontal([img])
 
         left_side = img_merged
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
@@ -119,12 +130,12 @@ class DetectionInImage(SlidingWindow, SVMModel):
         fnames = []
 #         fnames = ['./test_images/straight13.jpg','./test_images/straight14.jpg','./test_images/straight15.jpg',
 #                   './test_images/straight16.jpg','./test_images/straight17.jpg']
-        fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
-          '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
+#         fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
+#           '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
         fnames_cars = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
-          '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
+        '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
         fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg','../data/hard_frames/frame_338.jpg',
                             '../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg','../data/hard_frames/frame_774.jpg',
                             '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg',
@@ -138,7 +149,7 @@ class DetectionInImage(SlidingWindow, SVMModel):
 #         fnames.extend(fnames_test)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
-#         fnames = ['../data/test_images/car29.jpg']
+        fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
         res_imgs_2 = []
         for fname in fnames:

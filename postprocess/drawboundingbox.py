@@ -20,7 +20,7 @@ class DrawBoundingBox(object):
 #         for bbox in bboxes:
         for i in range(len(bboxes)):
             bbox = bboxes[i]
-            pt1,pt2 = bbox
+            pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
             cv2.rectangle(draw_img, pt1, pt2, color=color, thickness=thick)
             if len(bboxes_scores) != 0:
                 score = bboxes_scores[i]

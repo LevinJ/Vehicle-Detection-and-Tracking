@@ -58,18 +58,18 @@ class PreprocessData(SpatialBin, ColorHistogram, HOGFeature):
             bs_features = self.bin_spatial(rgb_img)
             feature_list.append(bs_features)
         return 
-    def __extract_lab_hog(self, rgb_img, feature_list):
+    def __extract_lab_hog(self, rgb_img, feature_list,feature_vec=True):
         img_lab = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2LAB)
     
-        feature_list.append(self.get_hog_features(img_lab[:,:,0]))
-        feature_list.append(self.get_hog_features(img_lab[:,:,1]))
-        feature_list.append(self.get_hog_features(img_lab[:,:,2]))
+        feature_list.append(self.get_hog_features(img_lab[:,:,0],feature_vec=feature_vec))
+        feature_list.append(self.get_hog_features(img_lab[:,:,1],feature_vec=feature_vec))
+        feature_list.append(self.get_hog_features(img_lab[:,:,2],feature_vec=feature_vec))
         
         return
     def extract_lab_hog_mulit_dimenstion(self, rgb_img):
         feature_list = []
-        hog = self.__extract_lab_hog(rgb_img, feature_list)
-        hog = np.concatenate([feature_list[0].reshape(-1,1),feature_list[1].reshape(-1,1),feature_list[2].reshape(-1,1)], axis = 0)
+        self.__extract_lab_hog(rgb_img, feature_list, feature_vec=False)
+        hog = np.concatenate([feature_list[0][np.newaxis,:],feature_list[1][np.newaxis,:],feature_list[2][np.newaxis,:]], axis = 0)
         return hog
 
     def extract_features(self, rgb_img):

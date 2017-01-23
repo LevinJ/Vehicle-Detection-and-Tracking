@@ -66,17 +66,16 @@ class SVMModel(PrepareData):
         print("training time:", round(time()-t0, 3), "s")
         return  scores.mean()
     def predict_sliding_window(self, img):
-        dump_load = DumpLoad('../data/smvmodel.pickle')
+       
+        features = self.extract_features(img).reshape(1,-1)
+        
+        return self.predict_feature_batch(features)
+    def predict_feature_batch(self, features):
         if  not hasattr(self, 'estimator'):
-            if dump_load.isExisiting():
-                self.estimator = dump_load.load()
-            else:
-                self.run_train_validation() 
-                dump_load.dump(self.estimator)
-
-        features = self.extract_features(img)
-        res = self.estimator.decision_function(features.reshape(1,-1))
-        return res[0]
+            dump_load = DumpLoad('../data/smvmodel.pickle')
+            self.estimator = dump_load.load()
+        res = self.estimator.decision_function(features)
+        return res
     def run_train_validation(self):
         
         dump_load = DumpLoad('../data/smvmodel.pickle')
