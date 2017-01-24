@@ -2,21 +2,44 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from postprocess.drawboundingbox import DrawBoundingBox
+from skimage.feature import blob_doh
+from sklearn.cluster import DBSCAN
+from sklearn import metrics
+import matplotlib.pyplot as plt
 
 
-class HeatMap(object):
+class HeatMap(DrawBoundingBox):
     def __init__(self):
+        DrawBoundingBox.__init__(self)
         return
     def get_bboxes(self, img, bboxes,bboxes_scores):
-        bboxes = np.asarray(bboxes)
-        bboxes_scores = np.asarray(bboxes_scores)
         heat_map_img = self.__get_heat_map(img, bboxes, bboxes_scores)
-        return self.__hot2boundingBox(heat_map_img,img)
+        heat_map_before_thres = heat_map_img.copy()
+        #threshold the heat heat map
+        thres = 80
+        heat_map_img [heat_map_img < thres] = 0
+        heat_map_img [heat_map_img >= thres] = 255
+        if ((heat_map_img==255).sum()==0):
+            return heat_map_img,heat_map_before_thres
+            
+#         plt.imshow(heat_map_img[:,:,0], cmap="gray")
+        
+     
+        blobs = blob_doh(heat_map_img[:,:,0], min_sigma=30, max_sigma=150, num_sigma=2, threshold=0.01, overlap=0.2, log_scale=False)
+        for blob in blobs:
+            y, x, r = blob
+            cv2.circle(heat_map_img, (int(x),int(y)),int(r),(255,0,0),thickness=6)
+
+        print(blobs)
+        return heat_map_img,heat_map_before_thres
+    
     def __get_heat_map(self,img, bboxes,bboxes_scores):
-        heat_map_img = np.zeros(img.shape[:2],dtype=np.float32)
+#         heat_map_img = img.copy()
+        heat_map_img = np.zeros_like(img)
+        
         for i in range(len(bboxes_scores)):
             win = bboxes[i]
-            heat_map_img[win[1]:win[3],win[0]:win[2]] += bboxes_scores[i]
+            heat_map_img[win[1]:win[3],win[0]:win[2]] += 40
         return heat_map_img
     def __hot2boundingBox(self,heat_map_img,image, hotThresh=3.5):
 
@@ -46,6 +69,45 @@ class HeatMap(object):
             bboxes_scores.append(1.0)
 #             cv2.circle(result, (cx, cy), 10, (0, 0, 255), 5)
         return boundingBox, bboxes_scores, heat_map
+class Clustering(DrawBoundingBox):
+    def __init__(self):
+        DrawBoundingBox.__init__(self)
+        return 
+    def get_bboxes(self, img, bboxes,bboxes_scores):
+        if len(bboxes) == 0:
+            return img, img
+        heat_map_before_thres = img
+        heat_map_img = np.zeros_like(img)
+        center_xs = (bboxes[:,0]+bboxes[:,2])/2
+        center_ys = (bboxes[:,1]+bboxes[:,3])/2
+        centers =np.concatenate((center_xs[:,np.newaxis], center_ys[:,np.newaxis]), axis = 1).astype(np.int16)
+        
+#         centers = StandardScaler().fit_transform(centers)
+        db = DBSCAN(eps=100, min_samples=3).fit(centers)
+        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+        core_samples_mask[db.core_sample_indices_] = True
+        labels = db.labels_
+        # Number of clusters in labels, ignoring noise if present.
+        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        
+        print('Estimated number of clusters: %d' % n_clusters_)
+        unique_labels = set(labels)
+        colors = [(255,0,0),(0,255,0),(0,0,255),(125,125,0),(0,125,125),(125,0,125)]
+
+        for k in unique_labels:
+            if k == -1:
+                # white used for noise.
+                color = (255,255,255)
+            else:
+                color = colors[k]
+            group_indx = labels == k
+            for bbox, center in zip(bboxes[group_indx],centers[group_indx] ):
+                pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
+                cv2.rectangle(heat_map_img, pt1, pt2, color=color, thickness=6)
+                cv2.circle(heat_map_img, tuple(center), 4,color,thickness=-1)
+
+    
+        return heat_map_img,heat_map_before_thres
 
 class MergeBBox(DrawBoundingBox):
     def __init__(self):
@@ -55,12 +117,11 @@ class MergeBBox(DrawBoundingBox):
         return
     def __filer_low_score_bbox(self,bboxes,bboxes_scores):
         
-        cars = bboxes_scores > 0.1
+        cars = bboxes_scores > 0.6
 
         return bboxes[cars],bboxes_scores[cars]
     
     def __get_bbox_groupRec(self,bboxes_rec ):
-#         bboxes_rec2 = np.array([[1,2,3,4],[1,2,3,4],[4,5,6,7],[4,5,6,7]] )
         bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 2, 0.2)
         if len(bboxes_scores) != 0:
             bboxes_scores = bboxes_scores.ravel()
@@ -71,25 +132,16 @@ class MergeBBox(DrawBoundingBox):
         img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
-#         if len(bboxes_scores) == 0:
-#             return img, img_filtered_boxes
-         
-        bboxes,bboxes_scores = self.__get_bbox_groupRec(bboxes.tolist())
-        img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
+
+#         bboxes,bboxes_scores = self.__get_bbox_groupRec(bboxes.tolist())
         
-#         
-#         bboxes=[]
-#         print("merged bouding boxes")
-#         for i in range(len(bboxes_scores)):
-#             bbox_rec = bboxes_rec[i]
-#             x1,y1,x2,y2 = bbox_rec
-#             score = bboxes_scores[i]
-#             size = (x2-x1,y2-y1)
-#             
-#             print("size {}: score {:.2f}, pos{}".format(size, score, ((x1,y1),(x2,y2 ))))
-#             bboxes.append(((x1,y1),(x2,y2 )))
+#         img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
+#         heat_map_img,heat_map_before_thres = HeatMap().get_bboxes(img, bboxes,bboxes_scores)
+        heat_map_img,heat_map_before_thres = Clustering().get_bboxes(img, bboxes,bboxes_scores)
+        
+
          
-        return img_all_boxes,img_filtered_boxes,img_merged_boxes
+        return img_all_boxes,img_filtered_boxes,heat_map_img,heat_map_before_thres
     
     
 

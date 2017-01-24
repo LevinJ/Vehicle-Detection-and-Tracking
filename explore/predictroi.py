@@ -96,17 +96,27 @@ class PredictRoi(DetectionInImage):
     def predict_img(self, img_path):
         img = mpimg.imread(img_path)
         img= self.process_image_RGB(img, None, None,Debug = True)
-        plt.imshow(img)
+        #for the purpose of showing hsv value
+        self.img = img 
+        _, ax = plt.subplots()
+        ax.format_coord = self.format_coord
+        ax.imshow(img)
+
         plt.show()
         return
+    def format_coord(self, x, y):
+        pt = self.img[y, x, :]
+        return 'RGB value, x={:.0f}, y={:.0f}  [R={}, G={}, B={}]'.format(x, y, pt[0],pt[1],pt[2])
     
     
     def run(self):
       
         img_path = '../data/test_images/car29.jpg'
-        img_path = '../data/test_images/test2.jpg'
+        img_path = '../data/test_images/test1.jpg'
 #         img_path = '../data/hard_frames/frame_952.jpg'
-        img_path = '../data/hard_frames/frame_513.jpg'
+#         img_path = '../data/hard_frames/frame_0.jpg'
+#         img_path = '../data/hard_frames/frame_1074.jpg'
+#         img_path = '../data/hard_frames/frame_622.jpg'
 
 #         self.predict_roi(img_path)
         self.predict_img(img_path)

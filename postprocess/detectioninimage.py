@@ -103,15 +103,19 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         print("maximum scores: {}".format(bboxes_scores.max()))
  
         
-        img_all_boxes,img_filtered_boxes,img_merged_boxes= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        img_all_boxes,img_filtered_boxes,heat_map_img,heat_map_before_thres= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
-        left_side = img_merged_boxes
+
+        
+        left_side = heat_map_img
         right_side = self.stack_image_horizontal([img, img_all_boxes,img_filtered_boxes])
+#         right_side = self.stack_image_horizontal([img])
+        right_side = cv2.resize(right_side, (0,0), fx=2, fy=1)
 
         
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
         print("processing time:", round(time()-t0, 3), "s")
-        return img_filtered_boxes
+        return img_final
 
     
     
@@ -120,16 +124,15 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         fnames = []
 #         fnames = ['./test_images/straight13.jpg','./test_images/straight14.jpg','./test_images/straight15.jpg',
 #                   './test_images/straight16.jpg','./test_images/straight17.jpg']
-#         fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
-#           '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
+        fnames_test = ['../data/test_images/test1.jpg','../data/test_images/test2.jpg','../data/test_images/test3.jpg','../data/test_images/test4.jpg',
+          '../data/test_images/test5.jpg','../data/test_images/test6.jpg']
         fnames_cars = ['../data/test_images/car0.jpg','../data/test_images/car5.jpg','../data/test_images/car10.jpg','../data/test_images/car15.jpg',
                   '../data/test_images/car20.jpg','../data/test_images/car25.jpg','../data/test_images/car26.jpg','../data/test_images/car27.jpg',
                   '../data/test_images/car28.jpg','../data/test_images/car29.jpg','../data/test_images/car30.jpg','../data/test_images/car32.jpg',
         '../data/test_images/car34.jpg','../data/test_images/car36.jpg','../data/test_images/car48.jpg','../data/test_images/car50.jpg']
         fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg','../data/hard_frames/frame_338.jpg',
                             '../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg','../data/hard_frames/frame_774.jpg',
-                            '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg',
-                            '../data/hard_frames/frame_1206.jpg']
+                            '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg','../data/hard_frames/frame_1206.jpg']
         hard_frames = []
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
@@ -142,7 +145,7 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
 
-        for fname in fnames:
+        for fname in fnames[6:]:
             print(fname)
             img = mpimg.imread(fname)
             img_final = self.process_image_RGB(img, None, None,Debug = False)
@@ -153,9 +156,9 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
        
             
          
-#         res_imgs = self.stack_image_vertical(res_imgs)
-        
-        res_imgs = vis_grid(np.asarray(res_imgs))
+        res_imgs = self.stack_image_vertical(res_imgs)
+#         res_imgs = cv2.resize(res_imgs, (1280*2,720*len(fnames)))
+#         res_imgs = vis_grid(np.asarray(res_imgs))
  
         
         plt.imshow(res_imgs)

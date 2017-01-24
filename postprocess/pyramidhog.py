@@ -12,7 +12,7 @@ class PyramidHog(PreprocessData):
         vertices = np.array([[(0 + 200, height - 40), (138, 450), (540, 330),
                               (width - 540, 330), (width - 0, 330), (width - 0, height - 40)]],dtype=np.int32)
         cv2.fillPoly(self.mask_roi, vertices, 255)
-        plt.imshow(self.mask_roi, cmap="gray")
+#         plt.imshow(self.mask_roi, cmap="gray")
         return 
     def __get_window_feature_one_scale(self, windows, features,rgb_img, scale, top_clip = 0, step=1):
         #get widnows/features for a particular scale
