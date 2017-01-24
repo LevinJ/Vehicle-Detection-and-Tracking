@@ -169,7 +169,7 @@ class MergeBBox(DrawBoundingBox):
         return bboxes_rec,bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores):
         if len(bboxes_scores) == 0:
-            return img,img
+            return img,img,img,img
         img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)

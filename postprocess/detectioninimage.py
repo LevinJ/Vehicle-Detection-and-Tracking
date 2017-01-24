@@ -100,7 +100,7 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         #Get all sliding windows
         t0 = time()
         bboxes,bboxes_scores = self.__predict_img_2(img)
-        print("maximum scores: {}".format(bboxes_scores.max()))
+#         print("maximum scores: {}".format(bboxes_scores.max()))
  
         
         img_all_boxes,img_filtered_boxes,heat_map_img,merged_img= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
