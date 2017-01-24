@@ -76,14 +76,13 @@ class Clustering(DrawBoundingBox):
     def get_bboxes(self, img, bboxes,bboxes_scores):
         if len(bboxes) == 0:
             return img, img
-        heat_map_before_thres = img
         heat_map_img = np.zeros_like(img)
         center_xs = (bboxes[:,0]+bboxes[:,2])/2
         center_ys = (bboxes[:,1]+bboxes[:,3])/2
         centers =np.concatenate((center_xs[:,np.newaxis], center_ys[:,np.newaxis]), axis = 1).astype(np.int16)
         
 #         centers = StandardScaler().fit_transform(centers)
-        db = DBSCAN(eps=100, min_samples=3).fit(centers)
+        db = DBSCAN(eps=80, min_samples=1).fit(centers)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
@@ -105,19 +104,51 @@ class Clustering(DrawBoundingBox):
                 pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
                 cv2.rectangle(heat_map_img, pt1, pt2, color=color, thickness=6)
                 cv2.circle(heat_map_img, tuple(center), 4,color,thickness=-1)
-            normalized_scores = bboxes_scores[group_indx]/bboxes_scores[group_indx].sum()
-            merged_box = (bboxes[group_indx] * normalized_scores.reshape(-1,1)).sum(axis = 0).astype(np.int16)
-            merged_boxes.append(merged_box)
-            pt1,pt2 = tuple(merged_box[:2]), tuple(merged_box[2:])
-            cv2.rectangle(heat_map_img, pt1, pt2, color=(0,0,255), thickness=6)
+            if k == -1:
+                #this is a noisy detection, skip it
+                continue
+            self.__add_outer_box(bboxes, bboxes_scores, group_indx, merged_boxes, heat_map_img)
+            
+
+            
+        #draw the final merged box    
         merged_img = img.copy()
         merged_img = self.draw_boxes(merged_img, merged_boxes)
-        
-
     
         return heat_map_img,merged_img
-    def __get_centroid(self, heat_map_img, bboxes,bboxes_scores):
+    def __is_in_reaonable_region(self,width,height,center):
+        _,y = center
+        print("height {}, width {}, center{}".format(width, height, center))
+        if (width< 100 and height < 100):
+            if y>500:
+                print("rejected: height {}, width {}, center{}".format(width, height, center))
+                return False
+        return True
+    def __add_outer_box(self, bboxes, bboxes_scores, group_indx,merged_boxes,heat_map_img):
+#         normalized_scores = bboxes_scores[group_indx]/bboxes_scores[group_indx].sum()
+#         merged_box = (bboxes[group_indx] * normalized_scores.reshape(-1,1)).sum(axis = 0).astype(np.int16)
+        
+        x1 =  bboxes[group_indx][:,0].min()
+        y1 =  bboxes[group_indx][:,1].min()
+        x2 = bboxes[group_indx][:,2].max()
+        y2 = bboxes[group_indx][:,3].max()
+        width = (x2-x1)
+        height = (y2-y1)
+        center = ((x1+x2)/2, (y1+y2)/2)
+        if not self.__is_in_reaonable_region(width,height,center):
+            return
+        
+        if len(bboxes)> 3:
+            x1 = int(x1 + height/5.0)
+            x2 = int(x2 - height/5.0)
+            y1 = int(y1 + height/5.0)
+            y2 = int(y2 - height/5.0)
+        merged_box = [x1,y1,x2,y2]
+        merged_boxes.append(merged_box)
+        pt1,pt2 = tuple(merged_box[:2]), tuple(merged_box[2:])
+        cv2.rectangle(heat_map_img, pt1, pt2, color=(0,0,255), thickness=6)
         return
+
 
 class MergeBBox(DrawBoundingBox):
     def __init__(self):
@@ -127,7 +158,7 @@ class MergeBBox(DrawBoundingBox):
         return
     def __filer_low_score_bbox(self,bboxes,bboxes_scores):
         
-        cars = bboxes_scores > 0.6
+        cars = bboxes_scores > 0.3
 
         return bboxes[cars],bboxes_scores[cars]
     

@@ -141,14 +141,14 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['../data/test_images/test4.jpg']
         
-        fnames.extend(fnames_hardframes)
-#         fnames.extend(fnames_test)
+#         fnames.extend(fnames_hardframes)
+        fnames.extend(fnames_test)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
 
-        for fname in fnames[6:]:
+        for fname in fnames[:6]:
             print(fname)
             img = mpimg.imread(fname)
             img_final = self.process_image_RGB(img, None, None,Debug = False)

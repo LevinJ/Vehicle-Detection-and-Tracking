@@ -116,7 +116,7 @@ class PredictRoi(DetectionInImage):
 #         img_path = '../data/hard_frames/frame_952.jpg'
 #         img_path = '../data/hard_frames/frame_0.jpg'
 #         img_path = '../data/hard_frames/frame_1074.jpg'
-#         img_path = '../data/hard_frames/frame_622.jpg'
+        img_path = '../data/hard_frames/frame_723.jpg'
 
 #         self.predict_roi(img_path)
         self.predict_img(img_path)
