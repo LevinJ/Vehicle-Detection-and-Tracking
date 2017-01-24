@@ -149,7 +149,7 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         fnames.extend(fnames_test)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
-        fnames = ['../data/hard_frames/frame_622.jpg']
+#         fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
         res_imgs_2 = []
         for fname in fnames:
