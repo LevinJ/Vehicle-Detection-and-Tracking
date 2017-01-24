@@ -100,29 +100,18 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         #Get all sliding windows
         t0 = time()
         bboxes,bboxes_scores = self.__predict_img_2(img)
-        print(bboxes_scores)
-        #initial boudning box
-#         img_bouding_box = img.copy()
-#         img_bouding_box = self.draw_boxes(img_bouding_box, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
-       
+        print("maximum scores: {}".format(bboxes_scores.max()))
+ 
         
+        img_all_boxes,img_filtered_boxes= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
-#         bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,_ = g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
-        
-        #filtered image
-#         filtered_img = img.copy() 
-#         filtered_img = self.draw_boxes(filtered_img, filtered_bboxes, color=(0, 0, 255), thick=6, bboxes_scores = filtered_bboxes_scores)  
-        #image after merging  
-        img_merged = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)  
-        
-#         self.save_hard_samples(hard_samples_folder, img, bboxes,frame_num)     
-        
-        right_side = self.stack_image_horizontal([img])
+        left_side = img_filtered_boxes
+        right_side = self.stack_image_horizontal([img, img_all_boxes])
 
-        left_side = img_merged
+        
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
         print("processing time:", round(time()-t0, 3), "s")
-        return img_final,left_side
+        return left_side
     
     
     def run(self):
@@ -151,13 +140,13 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
-        res_imgs_2 = []
+
         for fname in fnames:
             print(fname)
             img = mpimg.imread(fname)
-            img_final,left_side = self.process_image_RGB(img, None, None,Debug = False)
+            img_final = self.process_image_RGB(img, None, None,Debug = False)
             res_imgs.append(img_final)
-            res_imgs_2.append(left_side)
+
             
         print("prediction time:", round(time()-t0, 3), "s")
        
@@ -165,7 +154,7 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
          
 #         res_imgs = self.stack_image_vertical(res_imgs)
         
-        res_imgs = vis_grid(np.asarray(res_imgs_2))
+        res_imgs = vis_grid(np.asarray(res_imgs))
  
         
         plt.imshow(res_imgs)

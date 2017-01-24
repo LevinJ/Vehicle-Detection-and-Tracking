@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from postprocess.drawboundingbox import DrawBoundingBox
 
 
 class HeatMap(object):
@@ -46,53 +47,18 @@ class HeatMap(object):
 #             cv2.circle(result, (cx, cy), 10, (0, 0, 255), 5)
         return boundingBox, bboxes_scores, heat_map
 
-class MergeBBox():
+class MergeBBox(DrawBoundingBox):
     def __init__(self):
-        sliding_windows = {}
-#         sliding_windows[(110,60)]= {'config': (([640, None],[400, 480], [8, 16])),
-#                            'thres': 0}
-#         sliding_windows[(254,130)]= {'config': (([640, 1276],[391, 525], [2, 6])),
-#                                    'thres': 1}
-        sliding_windows[(80,40)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
-                                   'thres': 0}
-        sliding_windows[(96,48)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
-                                   'thres': 0}
-        sliding_windows[(102,50)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
-                                   'thres': 0}
-#    
-        sliding_windows[(64,64)]= {'config': (([None, None],[330, 720], [0.5, 0.5])),
-                                   'thres': 0}
-#         sliding_windows[(256,256)]= {'config': (([None, None],[330, 720], [128, 128])),
-#                                    'thres': 1}
-
-        self.sliding_windows = sliding_windows
-        self.sliding_windows_config = self.parse_sliding_window_configs()
+        DrawBoundingBox.__init__(self)
+    
 
         return
-    def parse_sliding_window_configs(self):
-        config = []
-        
-        for size, v in self.sliding_windows.items():
-            item = []
-            item.append(size)
-            item .extend(v['config'])
-            config.append(item)     
-        return config
     def __filer_low_score_bbox(self,bboxes,bboxes_scores):
-        new_bboxes = []
-        new_bboxes_scores = []
-        for i in range(len(bboxes_scores)):
-            bbox = bboxes[i]
-            pt1,pt2 = bbox
-            size = (pt2[0]-pt1[0], pt2[1] - pt1[1])
-            score = bboxes_scores[i]
-            thres = self.sliding_windows[size]['thres']
-            print("size {}: score {:.2f}, pos{}".format(size, score, bbox))
-            if score > thres:
-                new_bboxes.append(bbox)
-                new_bboxes_scores.append(score)
-                
-        return new_bboxes,new_bboxes_scores
+        
+        cars = bboxes_scores > 0.1
+
+        return bboxes[cars],bboxes_scores[cars]
+    
     def __get_bbox_groupRec(self,bboxes_rec ):
         bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 1, 0.2)
         if len(bboxes_scores) != 0:
@@ -100,28 +66,30 @@ class MergeBBox():
         return bboxes_rec,bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores):
         if len(bboxes_scores) == 0:
-            return bboxes,bboxes_scores,(),(),None
-        filtered_bboxes,filtered_bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
-        bboxes_rec = []   
-        for bbox in filtered_bboxes:
-            bboxes_rec.append([item for pt in bbox for item in pt])
-        heat_map = None
-        
-        bboxes_rec,bboxes_scores = self.__get_bbox_groupRec(bboxes_rec)
-#         bboxes_rec,bboxes_scores,heat_map = HeatMap().get_bboxes(img, bboxes_rec, filtered_bboxes_scores)
-        
-        bboxes=[]
-        print("merged bouding boxes")
-        for i in range(len(bboxes_scores)):
-            bbox_rec = bboxes_rec[i]
-            x1,y1,x2,y2 = bbox_rec
-            score = bboxes_scores[i]
-            size = (x2-x1,y2-y1)
-            
-            print("size {}: score {:.2f}, pos{}".format(size, score, ((x1,y1),(x2,y2 ))))
-            bboxes.append(((x1,y1),(x2,y2 )))
+            return img
+        img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
+        bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
+        img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
+#         bboxes_rec = []   
+#         for bbox in filtered_bboxes:
+#             bboxes_rec.append([item for pt in bbox for item in pt])
+#      
+#         
+#         bboxes_rec,bboxes_scores = self.__get_bbox_groupRec(bboxes_rec)
+# 
+#         
+#         bboxes=[]
+#         print("merged bouding boxes")
+#         for i in range(len(bboxes_scores)):
+#             bbox_rec = bboxes_rec[i]
+#             x1,y1,x2,y2 = bbox_rec
+#             score = bboxes_scores[i]
+#             size = (x2-x1,y2-y1)
+#             
+#             print("size {}: score {:.2f}, pos{}".format(size, score, ((x1,y1),(x2,y2 ))))
+#             bboxes.append(((x1,y1),(x2,y2 )))
          
-        return bboxes,bboxes_scores,filtered_bboxes,filtered_bboxes_scores,heat_map
+        return img_all_boxes,img_filtered_boxes
     
     
 
