@@ -95,7 +95,7 @@ class PredictRoi(DetectionInImage):
         return
     def predict_img(self, img_path):
         img = mpimg.imread(img_path)
-        img,_ = self.process_image_RGB(img, None, None,Debug = True)
+        img= self.process_image_RGB(img, None, None,Debug = True)
         plt.imshow(img)
         plt.show()
         return

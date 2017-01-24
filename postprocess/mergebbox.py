@@ -60,23 +60,23 @@ class MergeBBox(DrawBoundingBox):
         return bboxes[cars],bboxes_scores[cars]
     
     def __get_bbox_groupRec(self,bboxes_rec ):
-        bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 1, 0.2)
+#         bboxes_rec2 = np.array([[1,2,3,4],[1,2,3,4],[4,5,6,7],[4,5,6,7]] )
+        bboxes_rec,bboxes_scores = cv2.groupRectangles(bboxes_rec, 2, 0.2)
         if len(bboxes_scores) != 0:
             bboxes_scores = bboxes_scores.ravel()
         return bboxes_rec,bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores):
         if len(bboxes_scores) == 0:
-            return img
+            return img,img
         img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
-#         bboxes_rec = []   
-#         for bbox in filtered_bboxes:
-#             bboxes_rec.append([item for pt in bbox for item in pt])
-#      
-#         
-#         bboxes_rec,bboxes_scores = self.__get_bbox_groupRec(bboxes_rec)
-# 
+#         if len(bboxes_scores) == 0:
+#             return img, img_filtered_boxes
+         
+        bboxes,bboxes_scores = self.__get_bbox_groupRec(bboxes.tolist())
+        img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
+        
 #         
 #         bboxes=[]
 #         print("merged bouding boxes")
@@ -89,7 +89,7 @@ class MergeBBox(DrawBoundingBox):
 #             print("size {}: score {:.2f}, pos{}".format(size, score, ((x1,y1),(x2,y2 ))))
 #             bboxes.append(((x1,y1),(x2,y2 )))
          
-        return img_all_boxes,img_filtered_boxes
+        return img_all_boxes,img_filtered_boxes,img_merged_boxes
     
     
 
