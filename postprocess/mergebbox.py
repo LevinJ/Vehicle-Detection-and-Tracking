@@ -92,8 +92,8 @@ class Clustering(DrawBoundingBox):
         
         print('Estimated number of clusters: %d' % n_clusters_)
         unique_labels = set(labels)
-        colors = [(255,0,0),(0,255,0),(0,0,255),(125,125,0),(0,125,125),(125,0,125)]
-
+        colors = [(255,0,0),(0,255,0),(125,125,0),(0,125,125),(125,0,125),(0,0,125),(125,0,0)]
+        merged_boxes = []
         for k in unique_labels:
             if k == -1:
                 # white used for noise.
@@ -105,9 +105,19 @@ class Clustering(DrawBoundingBox):
                 pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
                 cv2.rectangle(heat_map_img, pt1, pt2, color=color, thickness=6)
                 cv2.circle(heat_map_img, tuple(center), 4,color,thickness=-1)
+            normalized_scores = bboxes_scores[group_indx]/bboxes_scores[group_indx].sum()
+            merged_box = (bboxes[group_indx] * normalized_scores.reshape(-1,1)).sum(axis = 0).astype(np.int16)
+            merged_boxes.append(merged_box)
+            pt1,pt2 = tuple(merged_box[:2]), tuple(merged_box[2:])
+            cv2.rectangle(heat_map_img, pt1, pt2, color=(0,0,255), thickness=6)
+        merged_img = img.copy()
+        merged_img = self.draw_boxes(merged_img, merged_boxes)
+        
 
     
-        return heat_map_img,heat_map_before_thres
+        return heat_map_img,merged_img
+    def __get_centroid(self, heat_map_img, bboxes,bboxes_scores):
+        return
 
 class MergeBBox(DrawBoundingBox):
     def __init__(self):
@@ -137,11 +147,11 @@ class MergeBBox(DrawBoundingBox):
         
 #         img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
 #         heat_map_img,heat_map_before_thres = HeatMap().get_bboxes(img, bboxes,bboxes_scores)
-        heat_map_img,heat_map_before_thres = Clustering().get_bboxes(img, bboxes,bboxes_scores)
+        heat_map_img,merged_img = Clustering().get_bboxes(img, bboxes,bboxes_scores)
         
 
          
-        return img_all_boxes,img_filtered_boxes,heat_map_img,heat_map_before_thres
+        return img_all_boxes,img_filtered_boxes,heat_map_img,merged_img
     
     
 
