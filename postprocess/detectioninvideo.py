@@ -72,11 +72,11 @@ class DetectionInVideo(DetectionInImage):
     def test_on_frame(self):
         clip = VideoFileClip('../data/project_video.mp4')
         initial_img = None
-        frame_ids = [0,187,266,338,513,622,723,774,952,1041,1074,1206]
+        frame_ids = [141,203,441,457,567,746,783,1122]
         for img in clip.iter_frames():
             if self.count in frame_ids:
                 initial_img = img
-                plt.imsave('../data/hard_frames/frame_{}.jpg'.format(self.count), initial_img)
+                plt.imsave('../data/hard_frames_2/frame_{}.jpg'.format(self.count), initial_img)
             self.count = self.count + 1
             
           
@@ -85,9 +85,9 @@ class DetectionInVideo(DetectionInImage):
         
         return final_img
     def run(self):
-        self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
-#         self.test_on_frame()
-        plt.show()
+#         self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
+        self.test_on_frame()
+#         plt.show()
         
         return
 

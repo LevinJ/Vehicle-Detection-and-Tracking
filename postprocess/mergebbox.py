@@ -75,39 +75,24 @@ class Clustering(DrawBoundingBox):
         return 
     def get_bboxes(self, img, bboxes,bboxes_scores):
         if len(bboxes) == 0:
-            return img, img
-        heat_map_img = np.zeros_like(img)
-        center_xs = (bboxes[:,0]+bboxes[:,2])/2
-        center_ys = (bboxes[:,1]+bboxes[:,3])/2
-        centers =np.concatenate((center_xs[:,np.newaxis], center_ys[:,np.newaxis]), axis = 1).astype(np.int16)
+            return img, img,img
+
+        labels,centers,clustering_img_temp = self.__cluster_bdboxes(img, bboxes,bboxes_scores)
         
-#         centers = StandardScaler().fit_transform(centers)
-        db = DBSCAN(eps=80, min_samples=1).fit(centers)
-        core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-        core_samples_mask[db.core_sample_indices_] = True
-        labels = db.labels_
-        # Number of clusters in labels, ignoring noise if present.
-        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        clustering_img = self.__draw_clustering(img, labels, bboxes, centers)
         
-        print('Estimated number of clusters: %d' % n_clusters_)
-        unique_labels = set(labels)
-        colors = [(255,0,0),(0,255,0),(125,125,0),(0,125,125),(125,0,125),(0,0,125),(125,0,0)]
+        
+        #display clustering result
+        unique_labels = np.unique(labels)
+#         colors = [(255,0,0),(0,255,0),(125,125,0),(0,125,125),(125,0,125),(0,0,125),(125,0,0)]
         merged_boxes = []
-        for k in unique_labels:
-            if k == -1:
-                # white used for noise.
-                color = (255,255,255)
-            else:
-                color = colors[k]
-            group_indx = labels == k
-            for bbox, center in zip(bboxes[group_indx],centers[group_indx] ):
-                pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
-                cv2.rectangle(heat_map_img, pt1, pt2, color=color, thickness=6)
-                cv2.circle(heat_map_img, tuple(center), 4,color,thickness=-1)
-            if k == -1:
+        for i in range(len(unique_labels)):
+            label = unique_labels[i]
+            group_indx = labels == label
+            if label == -1:
                 #this is a noisy detection, skip it
                 continue
-            self.__add_outer_box(bboxes, bboxes_scores, group_indx, merged_boxes, heat_map_img)
+            self.__add_outer_box(bboxes, bboxes_scores, group_indx, merged_boxes, clustering_img)
             
 
             
@@ -115,7 +100,78 @@ class Clustering(DrawBoundingBox):
         merged_img = img.copy()
         merged_img = self.draw_boxes(merged_img, merged_boxes)
     
-        return heat_map_img,merged_img
+        return clustering_img_temp, clustering_img,merged_img
+    def __get_bdbox_centers(self, bboxes):
+        center_xs = (bboxes[:,0]+bboxes[:,2])/2
+        center_ys = (bboxes[:,1]+bboxes[:,3])/2
+        centers =np.concatenate((center_xs[:,np.newaxis], center_ys[:,np.newaxis]), axis = 1).astype(np.int16)
+        return centers
+    def __draw_clustering(self, img, labels, bboxes, centers):
+        #display clustering result
+        clustering_img = np.zeros_like(img)
+        unique_labels = np.unique(labels)
+        colors = [(255,0,0),(0,255,0),(125,125,0),(0,125,125),(125,0,125),(0,0,125),(125,0,0)]
+        for i in range(len(unique_labels)):
+            label = unique_labels[i]
+            if label == -1:
+                # white used for noise.
+                color = (255,255,255)
+            else:
+                color = colors[i]
+            group_indx = labels == label
+            for bbox, center in zip(bboxes[group_indx],centers[group_indx] ):
+                pt1,pt2 = tuple(bbox[:2]), tuple(bbox[2:])
+                cv2.rectangle(clustering_img, pt1, pt2, color=color, thickness=6)
+                cv2.circle(clustering_img, tuple(center), 4,color,thickness=-1)
+        return clustering_img
+    def __cluster_bdboxes(self, img, bboxes,bboxes_scores):
+        centers = self.__get_bdbox_centers(bboxes)
+        
+        
+
+        db = DBSCAN(eps=100, min_samples=3).fit(centers)
+        
+        
+
+        labels = db.labels_
+        clustering_img_temp = self.__draw_clustering(img, labels, bboxes, centers)
+        labels = self.__reclustering(labels, img, bboxes, bboxes_scores, centers)
+           
+        # Number of clusters in labels, ignoring noise if present.
+        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        
+        print('Estimated number of clusters: %d' % n_clusters_)
+        return labels,centers, clustering_img_temp
+    def __reclustering(self,labels, img, bboxes,bboxes_scores,centers):
+        unique_labels = set(labels)
+        # do one more clutering if the blob is too large
+        for label in unique_labels:
+            if label == -1:
+                continue
+            group_sel = label == labels
+            if group_sel.sum() < 10:
+                continue
+             
+            group_indices = group_sel.nonzero()[0]
+            
+            sub_sel = bboxes_scores[group_sel] > 0.7
+            sub_indices = sub_sel.nonzero()[0]
+            if sub_sel.sum() < 3:
+                continue
+            sub_bboxes = bboxes[group_sel][sub_sel]
+            
+            #set all the points in this group as noise first
+            group_labels = np.full(len(group_indices), 0, dtype = np.int16)
+            group_labels[(~sub_sel)] = -1
+            
+            sub_centers = self.__get_bdbox_centers(sub_bboxes)
+                
+            sub_db = DBSCAN(eps=100, min_samples=3).fit(sub_centers)
+            sub_labels = sub_db.labels_
+            sub_labels = label * 100 + sub_labels
+            group_labels[sub_indices] = sub_labels
+            labels[group_indices] = group_labels
+        return labels
     def __is_in_reaonable_region(self,width,height,center):
         _,y = center
         print("height {}, width {}, center{}".format(width, height, center))
@@ -139,8 +195,8 @@ class Clustering(DrawBoundingBox):
             return
         
         if len(bboxes)> 3:
-            x1 = int(x1 + height/5.0)
-            x2 = int(x2 - height/5.0)
+#             x1 = int(x1 + height/5.0)
+#             x2 = int(x2 - height/5.0)
             y1 = int(y1 + height/5.0)
             y2 = int(y2 - height/5.0)
         merged_box = [x1,y1,x2,y2]
@@ -158,7 +214,7 @@ class MergeBBox(DrawBoundingBox):
         return
     def __filer_low_score_bbox(self,bboxes,bboxes_scores):
         
-        cars = bboxes_scores > 0.3
+        cars = bboxes_scores > 0.1
 
         return bboxes[cars],bboxes_scores[cars]
     
@@ -178,11 +234,11 @@ class MergeBBox(DrawBoundingBox):
         
 #         img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
 #         heat_map_img,heat_map_before_thres = HeatMap().get_bboxes(img, bboxes,bboxes_scores)
-        heat_map_img,merged_img = Clustering().get_bboxes(img, bboxes,bboxes_scores)
+        clustering_img_temp, clustering_img,merged_img = Clustering().get_bboxes(img, bboxes,bboxes_scores)
         
 
          
-        return img_all_boxes,img_filtered_boxes,heat_map_img,merged_img
+        return img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img
     
     
 

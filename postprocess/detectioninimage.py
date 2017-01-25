@@ -103,17 +103,15 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         print("maximum scores: {}".format(bboxes_scores.max()))
  
         
-        img_all_boxes,img_filtered_boxes,heat_map_img,merged_img= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
         
 
         
         left_side = merged_img
         
         detection_imgs = self.stack_image_horizontal([img, img_all_boxes])
-        merged_imgs = self.stack_image_horizontal([img_filtered_boxes,heat_map_img])
-        right_side = self.stack_image_vertical([detection_imgs,merged_imgs])
-
-#         right_side = cv2.resize(right_side, (0,0), fx=2, fy=1)
+        clustering_imgs = self.stack_image_horizontal([clustering_img_temp,clustering_img])
+        right_side = self.stack_image_vertical([detection_imgs,img_filtered_boxes, clustering_imgs])
 
         
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])
@@ -136,13 +134,15 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         fnames_hardframes = ['../data/hard_frames/frame_0.jpg','../data/hard_frames/frame_187.jpg','../data/hard_frames/frame_266.jpg','../data/hard_frames/frame_338.jpg',
                             '../data/hard_frames/frame_513.jpg','../data/hard_frames/frame_622.jpg','../data/hard_frames/frame_723.jpg','../data/hard_frames/frame_774.jpg',
                             '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg','../data/hard_frames/frame_1206.jpg']
-        hard_frames = []
+        fnames_hardframes_2 = ['../data/hard_frames_2/frame_141.jpg','../data/hard_frames_2/frame_203.jpg','../data/hard_frames_2/frame_441.jpg','../data/hard_frames_2/frame_457.jpg',
+                               '../data/hard_frames_2/frame_567.jpg','../data/hard_frames_2/frame_746.jpg','../data/hard_frames_2/frame_783.jpg','../data/hard_frames_2/frame_1122.jpg']
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['../data/test_images/test4.jpg']
         
 #         fnames.extend(fnames_hardframes)
-        fnames.extend(fnames_test)
+#         fnames.extend(fnames_test)
+        fnames.extend(fnames_hardframes_2)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/hard_frames/frame_622.jpg']
