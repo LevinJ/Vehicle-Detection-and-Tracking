@@ -103,15 +103,16 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         print("maximum scores: {}".format(bboxes_scores.max()))
  
         
-        img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img= g_mbbx.merge_bbox(img, bboxes,bboxes_scores) 
+        img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img,checked_img,heat_map= g_mbbx.merge_bbox(img, bboxes,bboxes_scores,frame_num) 
         
 
         
-        left_side = merged_img
+        left_side = checked_img
         
-        detection_imgs = self.stack_image_horizontal([img, img_all_boxes])
-        clustering_imgs = self.stack_image_horizontal([clustering_img_temp,clustering_img])
-        right_side = self.stack_image_vertical([detection_imgs,img_filtered_boxes, clustering_imgs])
+        top = self.stack_image_horizontal([img, img_all_boxes])
+        middle = self.stack_image_horizontal([img_filtered_boxes,clustering_img_temp])
+        bottom = self.stack_image_horizontal([clustering_img,merged_img,heat_map])
+        right_side = self.stack_image_vertical([top,middle,bottom])
 
         
         img_final = self.stack_image_horizontal([left_side, right_side], max_img_width = left_side.shape[1], max_img_height= left_side.shape[0])

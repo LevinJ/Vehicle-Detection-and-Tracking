@@ -6,6 +6,7 @@ from skimage.feature import blob_doh
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
 import matplotlib.pyplot as plt
+from postprocess.frametracking import g_frame_tracking
 
 
 class HeatMap(DrawBoundingBox):
@@ -75,7 +76,7 @@ class Clustering(DrawBoundingBox):
         return 
     def get_bboxes(self, img, bboxes,bboxes_scores):
         if len(bboxes) == 0:
-            return img, img,img
+            return img, img,img,[],[]
 
         labels,centers,clustering_img_temp = self.__cluster_bdboxes(img, bboxes,bboxes_scores)
         
@@ -86,21 +87,22 @@ class Clustering(DrawBoundingBox):
         unique_labels = np.unique(labels)
 #         colors = [(255,0,0),(0,255,0),(125,125,0),(0,125,125),(125,0,125),(0,0,125),(125,0,0)]
         merged_boxes = []
+        merged_boxes_scores = []
         for i in range(len(unique_labels)):
             label = unique_labels[i]
             group_indx = labels == label
             if label == -1:
                 #this is a noisy detection, skip it
                 continue
-            self.__add_outer_box(bboxes, bboxes_scores, group_indx, merged_boxes, clustering_img)
+            self.__add_outer_box(bboxes, bboxes_scores, group_indx, merged_boxes, merged_boxes_scores,clustering_img)
             
 
             
-        #draw the final merged box    
+        #draw the merged merged box    
         merged_img = img.copy()
         merged_img = self.draw_boxes(merged_img, merged_boxes)
     
-        return clustering_img_temp, clustering_img,merged_img
+        return clustering_img_temp, clustering_img,merged_img,merged_boxes,merged_boxes_scores
     def __get_bdbox_centers(self, bboxes):
         center_xs = (bboxes[:,0]+bboxes[:,2])/2
         center_ys = (bboxes[:,1]+bboxes[:,3])/2
@@ -174,15 +176,12 @@ class Clustering(DrawBoundingBox):
         return labels
     def __is_in_reaonable_region(self,width,height,center):
         _,y = center
-        print("height {}, width {}, center{}".format(width, height, center))
         if (width< 100 and height < 100):
             if y>500:
                 print("rejected: height {}, width {}, center{}".format(width, height, center))
                 return False
         return True
-    def __add_outer_box(self, bboxes, bboxes_scores, group_indx,merged_boxes,heat_map_img):
-#         normalized_scores = bboxes_scores[group_indx]/bboxes_scores[group_indx].sum()
-#         merged_box = (bboxes[group_indx] * normalized_scores.reshape(-1,1)).sum(axis = 0).astype(np.int16)
+    def __add_outer_box(self, bboxes, bboxes_scores, group_indx,merged_boxes,merged_boxes_scores,heat_map_img):
         
         x1 =  bboxes[group_indx][:,0].min()
         y1 =  bboxes[group_indx][:,1].min()
@@ -201,6 +200,7 @@ class Clustering(DrawBoundingBox):
             y2 = int(y2 - height/5.0)
         merged_box = [x1,y1,x2,y2]
         merged_boxes.append(merged_box)
+        merged_boxes_scores.append(bboxes_scores[group_indx])
         pt1,pt2 = tuple(merged_box[:2]), tuple(merged_box[2:])
         cv2.rectangle(heat_map_img, pt1, pt2, color=(0,0,255), thickness=6)
         return
@@ -223,9 +223,9 @@ class MergeBBox(DrawBoundingBox):
         if len(bboxes_scores) != 0:
             bboxes_scores = bboxes_scores.ravel()
         return bboxes_rec,bboxes_scores
-    def merge_bbox(self, img, bboxes,bboxes_scores):
+    def merge_bbox(self, img, bboxes,bboxes_scores,frame_num):
         if len(bboxes_scores) == 0:
-            return img,img,img,img
+            return img,img,np.zeros_like(img),np.zeros_like(img),img, img,np.zeros_like(img)
         img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
@@ -234,11 +234,15 @@ class MergeBBox(DrawBoundingBox):
         
 #         img_merged_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)
 #         heat_map_img,heat_map_before_thres = HeatMap().get_bboxes(img, bboxes,bboxes_scores)
-        clustering_img_temp, clustering_img,merged_img = Clustering().get_bboxes(img, bboxes,bboxes_scores)
+        clustering_img_temp, clustering_img,merged_img,merged_boxes,merged_boxes_scores = Clustering().get_bboxes(img, bboxes,bboxes_scores)
         
+        checked_boxes,heat_map = g_frame_tracking.check_cars(merged_boxes,merged_boxes_scores,frame_num)
+        #draw the checked image
+        checked_img = img.copy()
+        checked_img = self.draw_boxes(checked_img, checked_boxes)
 
          
-        return img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img
+        return img_all_boxes,img_filtered_boxes,clustering_img_temp, clustering_img,merged_img,checked_img,heat_map
     
     
 

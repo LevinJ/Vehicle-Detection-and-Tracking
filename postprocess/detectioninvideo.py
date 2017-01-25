@@ -6,6 +6,7 @@ import math
 import os
 from moviepy.editor import VideoFileClip
 from postprocess.detectioninimage import DetectionInImage
+from postprocess.frametracking import g_frame_tracking
 
 class DetectionInVideo(DetectionInImage):
     
@@ -65,9 +66,11 @@ class DetectionInVideo(DetectionInImage):
         
         return
     def test_on_videos(self, input_video, output_video):
+        g_frame_tracking.enable_tracking = True
         clip1 = VideoFileClip(input_video)
         white_clip = clip1.fl_image(self.process_image)
         white_clip.write_videofile(output_video, audio=False)
+        g_frame_tracking.save_tracking_info()
         return
     def test_on_frame(self):
         clip = VideoFileClip('../data/project_video.mp4')
@@ -85,8 +88,9 @@ class DetectionInVideo(DetectionInImage):
         
         return final_img
     def run(self):
+        self.test_on_videos('../data/test_video_1.mp4','../data/test_1.mp4')
 #         self.test_on_videos('../data/project_video.mp4','../data/project.mp4')
-        self.test_on_frame()
+#         self.test_on_frame()
 #         plt.show()
         
         return
