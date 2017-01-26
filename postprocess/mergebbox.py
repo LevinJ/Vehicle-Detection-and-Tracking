@@ -181,7 +181,7 @@ class Clustering(DrawBoundingBox):
             if y>500:
                 print("rejected: height {}, width {}, center{}".format(width, height, center))
                 return False
-        if (y < 405 and width >= 72):
+        if (y <= 410 and width >= 70):
             #remove detections that are unreasonalby larege near the top
             return False
         

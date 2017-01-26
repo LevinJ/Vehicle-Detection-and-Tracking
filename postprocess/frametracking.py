@@ -22,6 +22,8 @@ class FrameTracking():
         return
 
     def check_cars(self, detected_cars, detected_scores,frame_num):
+        if frame_num == 431:
+            print('debug')
         if not self.enable_tracking:
             return detected_cars,np.zeros((720,1280,3), dtype=np.uint8)
         if len(detected_cars)== 0:
@@ -66,6 +68,7 @@ class FrameTracking():
   
         return new_bdboxes
     def __moving_average(self, frame_num,car_info):
+        
         car_info['closet_node_dist'] = -1
         indices = self.df[(self.df['frame_num'] == frame_num-1) &(self.df['iscar'] == True)].index.values
         if len(indices) == 0:
@@ -98,8 +101,8 @@ class FrameTracking():
     def __closest_node(self, node, nodes):
         node = node.reshape(1,-1)
 
-        node = self.__get_bdbox_centers(node)
-        nodes = self.__get_bdbox_centers(nodes)
+        node = self.__get_bdbox_centers(node).astype(np.float32)
+        nodes = self.__get_bdbox_centers(nodes).astype(np.float32)
 
         dist = np.sum((nodes - node)**2, axis=1)
         dist = np.sqrt(dist)
