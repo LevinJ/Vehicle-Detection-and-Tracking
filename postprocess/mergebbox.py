@@ -181,6 +181,10 @@ class Clustering(DrawBoundingBox):
             if y>500:
                 print("rejected: height {}, width {}, center{}".format(width, height, center))
                 return False
+        if (y < 405 and width >= 84):
+            #remove detections that are unreasonalby larege near the top
+            return False
+        
         return True
     def __add_outer_box(self, bboxes, bboxes_scores, group_indx,merged_boxes,merged_boxes_scores,heat_map_img):
         

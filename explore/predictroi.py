@@ -112,11 +112,11 @@ class PredictRoi(DetectionInImage):
     def run(self):
       
         img_path = '../data/test_images/car29.jpg'
-        img_path = '../data/test_images/test1.jpg'
+        img_path = '../data/test_images/test3.jpg'
 #         img_path = '../data/hard_frames/frame_952.jpg'
 #         img_path = '../data/hard_frames/frame_0.jpg'
 #         img_path = '../data/hard_frames/frame_1074.jpg'
-        img_path = '../data/hard_frames/frame_266.jpg'
+#         img_path = '../data/hard_frames/frame_807.jpg'
 #         img_path = '../data/hard_frames_2/frame_441.jpg'
 
 #         self.predict_roi(img_path)

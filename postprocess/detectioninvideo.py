@@ -75,11 +75,11 @@ class DetectionInVideo(DetectionInImage):
     def test_on_frame(self):
         clip = VideoFileClip('../data/project_video.mp4')
         initial_img = None
-        frame_ids = [882,899,918,924]
+        frame_ids = [807]
         for img in clip.iter_frames():
             if self.count in frame_ids:
                 initial_img = img
-                plt.imsave('../data/overlapping/frame_{}.jpg'.format(self.count), initial_img)
+                plt.imsave('../data/falsepositives/frame_{}.jpg'.format(self.count), initial_img)
             self.count = self.count + 1
             
           
