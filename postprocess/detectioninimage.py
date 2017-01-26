@@ -147,10 +147,10 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         fnames = ['../data/test_images/test4.jpg']
         
 #         fnames.extend(fnames_hardframes)
-#         fnames.extend(fnames_test)
+        fnames.extend(fnames_test)
 #         fnames.extend(fnames_hardframes_2)
 #         fnames.extend(fnames_missing)
-        fnames.extend(fnames_overlapping)
+#         fnames.extend(fnames_overlapping)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/hard_frames/frame_622.jpg']

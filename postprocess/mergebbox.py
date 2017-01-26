@@ -169,7 +169,7 @@ class Clustering(DrawBoundingBox):
             
             sub_centers = self.__get_bdbox_centers(sub_bboxes)
                 
-            sub_db = DBSCAN(eps=80, min_samples=SUB_MIN_NUM).fit(sub_centers)
+            sub_db = DBSCAN(eps=74, min_samples=SUB_MIN_NUM).fit(sub_centers)
             sub_labels = sub_db.labels_
             sub_labels = label * 100 + sub_labels
             group_labels[sub_indices] = sub_labels
@@ -230,7 +230,7 @@ class MergeBBox(DrawBoundingBox):
         return bboxes_rec,bboxes_scores
     def merge_bbox(self, img, bboxes,bboxes_scores,frame_num):
         if len(bboxes_scores) == 0:
-            return img,img,np.zeros_like(img),np.zeros_like(img),img, img,np.zeros_like(img)
+            return img,img,np.zeros_like(img),np.zeros_like(img),img, img,g_frame_tracking.get_initial_heatmap()
         img_all_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores) 
         bboxes,bboxes_scores = self.__filer_low_score_bbox(bboxes, bboxes_scores)
         img_filtered_boxes = self.draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, bboxes_scores = bboxes_scores)

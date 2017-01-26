@@ -20,14 +20,18 @@ class FrameTracking():
         self.df = pd.DataFrame()
        
         return
+    def get_initial_heatmap(self):
+        heat_map_img = np.zeros((720,1280,3), dtype=np.uint8)
+        heat_map_img[:,:,2] = 255 
+        return heat_map_img
 
     def check_cars(self, detected_cars, detected_scores,frame_num):
         if frame_num == 431:
             print('debug')
         if not self.enable_tracking:
-            return detected_cars,np.zeros((720,1280,3), dtype=np.uint8)
+            return detected_cars, self.get_initial_heatmap()
         if len(detected_cars)== 0:
-            return detected_cars,np.zeros((720,1280,3), dtype=np.uint8)
+            return detected_cars,self.get_initial_heatmap()
    
  
         heat_map = self.__draw_heat_map(frame_num)
@@ -77,7 +81,7 @@ class FrameTracking():
         last_bdboxes = np.vstack(self.df.iloc[indices]['adjusted_bdbox'].values)
         ind, dist = self.__closest_node(car_info['bdbox'], last_bdboxes)
         car_info['closet_node_dist'] = dist
-        if dist > 30:
+        if dist >= 41:
             return car_info['bdbox'] 
         last_bdbox = self.df.iloc[indices[ind]]['adjusted_bdbox']
         
@@ -87,7 +91,7 @@ class FrameTracking():
            
             return car_info['bdbox'] 
         
-        new_box = 0.7 * last_bdbox + 0.3 * car_info['bdbox']
+        new_box = 0.9 * last_bdbox + 0.1 * car_info['bdbox']
         new_box = new_box.astype(np.int16)
         
         print("adjusted bdbox {}, distance {}".format(new_box, dist))
@@ -140,7 +144,7 @@ class FrameTracking():
         return True
     def __draw_heat_map(self,frame_num):
         
-        heat_map_img = np.zeros((720,1280,3), dtype=np.uint8)
+        heat_map_img = self.get_initial_heatmap()
         if len(self.df) == 0: 
             return heat_map_img
         last_frame_num  = frame_num - 10
@@ -148,7 +152,7 @@ class FrameTracking():
         
         for bdbox in hot_map_df['bdbox']:
             x1,y1,x2,y2 = bdbox
-            heat_map_img[y1:y2, x1:x2] += 20
+            heat_map_img[y1:y2, x1:x2,0] += 20
             
         return heat_map_img
     
