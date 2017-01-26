@@ -41,6 +41,9 @@ class FrameTracking():
             car_info['scores'] = scores
             car_info['bdbox'] = np.asarray(car)
             car_info['frame_num'] = frame_num
+            car_info['closet_node_dist'] = -100
+            car_info['adjusted_bdbox'] = np.array([0,0,0,0])
+            
             print("height {}, width {}, center {}, bdbox {}".format(car_info['width'], car_info['height'], 
                                                          (car_info['center_x'],car_info['center_y']),
                                                          car_info['bdbox']))
@@ -63,6 +66,7 @@ class FrameTracking():
   
         return new_bdboxes
     def __moving_average(self, frame_num,car_info):
+        car_info['closet_node_dist'] = -1
         indices = self.df[(self.df['frame_num'] == frame_num-1) &(self.df['iscar'] == True)].index.values
         if len(indices) == 0:
             return car_info['bdbox']
@@ -77,12 +81,15 @@ class FrameTracking():
         last_width = last_bdbox[2] - last_bdbox[0]
         current_width = car_info['width']
         if abs(last_width - current_width)/float(current_width) > 0.5:
-            # this is an assertive of saying that we trust past records/consistency better
-            return last_bdbox
+           
+            return car_info['bdbox'] 
         
-        new_box = 0.8 * last_bdbox + 0.2 * car_info['bdbox']
+        new_box = 0.7 * last_bdbox + 0.3 * car_info['bdbox']
+        new_box = new_box.astype(np.int16)
+        
+        print("adjusted bdbox {}, distance {}".format(new_box, dist))
 
-        return new_box.astype(np.int16)
+        return new_box
     def __get_bdbox_centers(self, bboxes):
         center_xs = (bboxes[:,0]+bboxes[:,2])/2
         center_ys = (bboxes[:,1]+bboxes[:,3])/2
@@ -93,27 +100,26 @@ class FrameTracking():
 
         node = self.__get_bdbox_centers(node)
         nodes = self.__get_bdbox_centers(nodes)
-        try:
-            dist = np.sum((nodes - node)**2, axis=1)
-            dist = np.sqrt(dist)
-        except:
-            print(nodes)
+
+        dist = np.sum((nodes - node)**2, axis=1)
+        dist = np.sqrt(dist)
+
         return np.argmin(dist), np.min(dist)
-    def __prev_frames_average(self, frame_num,car_info):
-        last_frame_num  = frame_num - 10
-        conditon_1 = (self.df['frame_num'] >= last_frame_num) & (self.df['iscar'] == True)
-        df = self.df[conditon_1]
-        condition_2 = ((df['center_x'] - car_info['center_x']) < 20) & ((df['center_y'] - car_info['center_y']) < 20)
-        
-        df = df[condition_2]
-        if len(df) == 0:
-            return car_info['bdbox']
-            
-        prev_box = df['bdbox'].values
-        prev_box = np.asarray(prev_box.tolist()).mean(axis=0)
-        cur_box = np.asarray(car_info['bdbox'])
-        new_box = 0.8 * prev_box + 0.2 * cur_box
-        return new_box.astype(np.int16)
+#     def __prev_frames_average(self, frame_num,car_info):
+#         last_frame_num  = frame_num - 10
+#         conditon_1 = (self.df['frame_num'] >= last_frame_num) & (self.df['iscar'] == True)
+#         df = self.df[conditon_1]
+#         condition_2 = ((df['center_x'] - car_info['center_x']) < 20) & ((df['center_y'] - car_info['center_y']) < 20)
+#         
+#         df = df[condition_2]
+#         if len(df) == 0:
+#             return car_info['bdbox']
+#             
+#         prev_box = df['bdbox'].values
+#         prev_box = np.asarray(prev_box.tolist()).mean(axis=0)
+#         cur_box = np.asarray(car_info['bdbox'])
+#         new_box = 0.8 * prev_box + 0.2 * cur_box
+#         return new_box.astype(np.int16)
     def save_tracking_info(self):
         fname = '../data/tracking.csv'
         self.df.to_csv(fname)
@@ -126,7 +132,7 @@ class FrameTracking():
             return False
         heat_value = heat_map[car_info['center_y'], car_info['center_x']][0]
         car_info['heat_value'] = heat_value
-        if  heat_value <= 160:
+        if  heat_value <= 140:
             return False
         return True
     def __draw_heat_map(self,frame_num):

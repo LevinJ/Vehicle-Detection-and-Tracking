@@ -169,7 +169,7 @@ class Clustering(DrawBoundingBox):
             
             sub_centers = self.__get_bdbox_centers(sub_bboxes)
                 
-            sub_db = DBSCAN(eps=70, min_samples=SUB_MIN_NUM).fit(sub_centers)
+            sub_db = DBSCAN(eps=80, min_samples=SUB_MIN_NUM).fit(sub_centers)
             sub_labels = sub_db.labels_
             sub_labels = label * 100 + sub_labels
             group_labels[sub_indices] = sub_labels
@@ -181,7 +181,7 @@ class Clustering(DrawBoundingBox):
             if y>500:
                 print("rejected: height {}, width {}, center{}".format(width, height, center))
                 return False
-        if (y < 405 and width >= 84):
+        if (y < 405 and width >= 72):
             #remove detections that are unreasonalby larege near the top
             return False
         

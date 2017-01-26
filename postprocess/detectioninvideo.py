@@ -75,7 +75,7 @@ class DetectionInVideo(DetectionInImage):
     def test_on_frame(self):
         clip = VideoFileClip('../data/project_video.mp4')
         initial_img = None
-        frame_ids = [807]
+        frame_ids = [740,719]
         for img in clip.iter_frames():
             if self.count in frame_ids:
                 initial_img = img
