@@ -131,7 +131,7 @@ class Clustering(DrawBoundingBox):
         
         
 
-        db = DBSCAN(eps=100, min_samples=3).fit(centers)
+        db = DBSCAN(eps=100, min_samples=2).fit(centers)
         
         
 
@@ -158,7 +158,8 @@ class Clustering(DrawBoundingBox):
             
             sub_sel = bboxes_scores[group_sel] > 0.7
             sub_indices = sub_sel.nonzero()[0]
-            if sub_sel.sum() < 3:
+            SUB_MIN_NUM = 3
+            if sub_sel.sum() <= SUB_MIN_NUM*2:
                 continue
             sub_bboxes = bboxes[group_sel][sub_sel]
             
@@ -168,7 +169,7 @@ class Clustering(DrawBoundingBox):
             
             sub_centers = self.__get_bdbox_centers(sub_bboxes)
                 
-            sub_db = DBSCAN(eps=100, min_samples=3).fit(sub_centers)
+            sub_db = DBSCAN(eps=70, min_samples=SUB_MIN_NUM).fit(sub_centers)
             sub_labels = sub_db.labels_
             sub_labels = label * 100 + sub_labels
             group_labels[sub_indices] = sub_labels

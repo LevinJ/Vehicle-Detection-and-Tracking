@@ -54,6 +54,7 @@ class FrameTracking():
             self.df = self.df.append(car_info, ignore_index=True)
         return np.asarray(bdboxes),heat_map
     def __adjust_car_bdbox(self, frame_num,car_info):
+        return car_info['bdbox']
         if len(self.df) == 0: 
             return car_info['bdbox']
         last_frame_num  = frame_num - 10

@@ -137,19 +137,26 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
                             '../data/hard_frames/frame_952.jpg','../data/hard_frames/frame_1041.jpg','../data/hard_frames/frame_1074.jpg','../data/hard_frames/frame_1206.jpg']
         fnames_hardframes_2 = ['../data/hard_frames_2/frame_141.jpg','../data/hard_frames_2/frame_203.jpg','../data/hard_frames_2/frame_441.jpg','../data/hard_frames_2/frame_457.jpg',
                                '../data/hard_frames_2/frame_567.jpg','../data/hard_frames_2/frame_746.jpg','../data/hard_frames_2/frame_783.jpg','../data/hard_frames_2/frame_1122.jpg']
+
+        fnames_missing = ['../data/missing/frame_610.jpg','../data/missing/frame_620.jpg','../data/missing/frame_629.jpg','../data/missing/frame_634.jpg',
+                          '../data/missing/frame_703.jpg']
+        fnames_overlapping = ['../data/overlapping/frame_882.jpg','../data/overlapping/frame_899.jpg','../data/overlapping/frame_918.jpg',
+                              '../data/overlapping/frame_924.jpg']
 #         fnames = ['./test_images/challenge0.jpg','./test_images/challenge1.jpg','./test_images/challenge2.jpg','./test_images/challenge3.jpg',
 #           './test_images/challenge4.jpg','./test_images/challenge5.jpg','./test_images/challenge6.jpg','./test_images/challenge7.jpg']
 #         fnames = ['../data/test_images/test4.jpg']
         
-#         fnames.extend(fnames_hardframes)
+        fnames.extend(fnames_hardframes)
 #         fnames.extend(fnames_test)
-        fnames.extend(fnames_hardframes_2)
+#         fnames.extend(fnames_hardframes_2)
+#         fnames.extend(fnames_missing)
+        fnames.extend(fnames_overlapping)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
 #         fnames = ['../data/hard_frames/frame_622.jpg']
         res_imgs = []
 
-        for fname in fnames[:6]:
+        for fname in fnames[6:]:
             print(fname)
             img = mpimg.imread(fname)
             img_final = self.process_image_RGB(img, None, None,Debug = False)
