@@ -30,10 +30,10 @@ Here is an example using the LAB color space and HOG parameters of orientations=
 
 
 
-The code for part is contained in file preprocess/hogfeature.py and file preprocess/preprocess.preprocessdata.py. In partuclar, the LAB HOG feature extraction is done in PreprocessData::extract_features_labels
+The code for this part is contained in file preprocess/hogfeature.py and file preprocess/preprocess.preprocessdata.py. In partuclar, the LAB HOG feature extraction is done in PreprocessData::extract_features_labels
 2. HOG parameters  
 
-I tried differrent different orientations, pixels_per_cell,cells_per_block and settled on orientations=9, pixels_per_cell=(8, 8) and cells_per_block=(2, 2) as this combination has top performance. More importantly, this combinations allows me to conviently precompute hog features when slding windows over the image during detection process. Sliding windows stargegy is discussed below.
+I tried different orientations, pixels_per_cell,cells_per_block and settled on orientations=9, pixels_per_cell=(8, 8) and cells_per_block=(2, 2) as this combination has top performance. More importantly, this combinations allows me to conviently precompute hog features when slding windows over the image during detection process. Sliding windows stargegy is discussed below.
 
 
 3. Classifier 
@@ -49,8 +49,8 @@ I tried differrent different orientations, pixels_per_cell,cells_per_block and s
 * Below is the break down
  1) scale the original 1280x720 image by different scales
  2) compute the hog feature for the scaled image
- 3) sliding a 7x7 windows with stride 1 over the hog feature obrained above, which essentially the same as sliding a 64x64 over the scaled imge with a 8 pixles stride.
- 4) predict on the 7x7 hog feature window (more precisely, it's 7x7x2x2x9)obtained
+ 3) sliding a 7x7 windows with stride 1 over the hog feature obrained above, which is essentially the same as sliding a 64x64 window over the scaled imge with stride 8.
+ 4) predict on the 7x7 hog feature window (more precisely, it's 7x7x2x2x9)
 * The scale of image pyramid is determined by experimentations. the bottom line is to cover all the cars.
 This part is mainly implmented in postprocess/pyramidhog.py, PyramidHog::get_window_feature, and postprocess/detectioninimage.py, DetectionInImage::process_image_RGB
 
@@ -73,7 +73,7 @@ This part is implmented in postprocess/mergebox.py
 1. Project video output
 [project video](https://youtu.be/5JIlVY1FgCk)
 2. False postive reduction
-A heat map is generated to track the position of predicted vehicles in the past 10 frames. For the current frame, if the centroid of deteced vehicles is located in hot area of the heat map, we would consider that this detection as real, otherwise we would reject it. The use of heatmap reduce some false positives that occassionally pop up in the heat map.
+A heat map is generated to track the position of predicted vehicles in the past 10 frames. For the current frame, if the centroid of deteced vehicles is located in hot area of the heat map, we would consider this detection as real, otherwise we would reject it. The use of heatmap reduce some false positives that occassionally pop up in the heat map.
 
 This part is implemented in postprocess/frametracking.py, specifically FrameTracking::check_cars
 3. Bouding box stabilization
@@ -86,7 +86,7 @@ This part is implemented in postprocess/frametracking.py, specifically FrameTrac
 
 ### Discussion
 
-This is a very interesting proejct in that it allows me to dive into the details of setting up a pipeline of object detection and tracking with a traditional computer vision approach. Current pipelines works well in the project video, but I can forsee it might not generalzie well in below scenarios:
+This is a very interesting proejct in that it allows me to dive into the details of setting up a pipeline of object detection and tracking with a traditional computer vision approach. Current pipeline works tolerably well in the project video, but I can forsee it might not generalzie well in below scenarios:
 * cars that are too small (less than 70x70)
 * cars that are too close to each other
 * some unseen negative samples in the scene
