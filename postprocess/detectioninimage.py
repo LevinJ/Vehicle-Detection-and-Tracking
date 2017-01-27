@@ -15,6 +15,7 @@ import datetime
 from time import time
 from postprocess.mergebbox import g_mbbx
 from postprocess.pyramidhog import PyramidHog
+from postprocess.frametracking import g_frame_tracking
 
 
 
@@ -111,7 +112,10 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
         
         top = self.stack_image_horizontal([img, img_all_boxes])
         middle = self.stack_image_horizontal([img_filtered_boxes,clustering_img_temp])
-        bottom = self.stack_image_horizontal([clustering_img,merged_img,heat_map])
+        if g_frame_tracking.enable_tracking:
+            bottom = self.stack_image_horizontal([clustering_img,merged_img,heat_map])
+        else:
+            bottom = self.stack_image_horizontal([clustering_img,merged_img])
         right_side = self.stack_image_vertical([top,middle,bottom])
 
         
@@ -153,7 +157,7 @@ class DetectionInImage(SlidingWindow, SVMModel, PyramidHog):
 #         fnames.extend(fnames_overlapping)
 #         fnames.extend(fnames_cars)
 #         fnames.extend(fnames_smallcars)
-#         fnames = ['../data/hard_frames/frame_622.jpg']
+#         fnames = ['../data/test_images/test1.jpg']
         res_imgs = []
 
         for fname in fnames[:6]:

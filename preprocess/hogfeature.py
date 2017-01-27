@@ -28,16 +28,31 @@ class HOGFeature(object):
             return features
    
     def run(self):
-        fname = '../data/3.png'
-        img = mpimg.imread(fname)
-        if len(img.shape)!=2:
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        
-        features, hog_image = self.get_hog_features(img, vis=True,feature_vec=False)
+        fnames = ['../data/dataset/non-vehicles/Extras/extra5590.png', '../data/dataset/vehicles/GTI_MiddleClose/image0113.png']
+        hog_imgs = []
+        for fname in fnames:
+            img = cv2.imread(fname)
+            rgb_img = img[...,::-1]
+            one_row = []
+            one_row.append(rgb_img)
+            lab_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2LAB)
+            for channel in range(3):
+                img = lab_img[:,:,channel]
+                _, hog_image = self.get_hog_features(img, vis=True,feature_vec=False)
+                one_row.append(hog_image)
+            hog_imgs.append(one_row)
 
         # Plot features
-        plt.imshow(hog_image, cmap='gray')
-        plt.title('Spatially Binned Features')
+        _,axes = plt.subplots(2,4)
+        for i in range(len(axes)):
+            titles = ['original image', 'L Channel HOG', 'A Channel HOG', 'B Channel HOG']
+            for j in range(len(axes[0])):
+                if j == 0:
+                    axes[i,j].imshow(hog_imgs[i][j])
+                else:
+                    axes[i,j].imshow(hog_imgs[i][j], cmap='gray')
+                axes[i,j].set_title(titles[j])
+               
        
         
         plt.show()
