@@ -21,12 +21,12 @@ The final pipleline has been successfully applied in [project video](https://you
 
 1. HOG features.  
 I started by reading in all the vehicle and non-vehicle images. Here is an example of some of the vehicle and non-vehicle classes:
-![Training Samples](https://github.com/LevinJ/CarND-Advanced-Lane-Lines/blob/master/camera_calibration.png)
+![Training Samples](https://github.com/LevinJ/Vehicle-Detection-and-Tracking/blob/master/output_images/training_samples.png)
 
 I then explored different color spaces and different skimage.hog() parameters (orientations, pixels_per_cell, and cells_per_block). I grabbed random images from each of the two classes and displayed them to get a feel for what the skimage.hog() output looks like.  
 
 Here is an example using the LAB color space and HOG parameters of orientations=9, pixels_per_cell=(8, 8) and cells_per_block=(2, 2):  
-![HOG Features](https://github.com/LevinJ/CarND-Advanced-Lane-Lines/blob/master/camera_calibration.png)
+![HOG Features](https://github.com/LevinJ/Vehicle-Detection-and-Tracking/blob/master/output_images/hog_features.png)
 
 
 
@@ -64,8 +64,8 @@ The pipeline for vehicle detection in a single image is as below:
  5) within the grouped detections, use the contour of the detections boxes as bouding box for the car
 
 Here are some examples of test images to demonstrate the pipeline:
-![Detection Pipleline](https://github.com/LevinJ/CarND-Advanced-Lane-Lines/blob/master/camera_calibration.png)
-![Detection Pipleline](https://github.com/LevinJ/CarND-Advanced-Lane-Lines/blob/master/camera_calibration.png)
+![Detection Pipleline](https://github.com/LevinJ/Vehicle-Detection-and-Tracking/blob/master/output_images/img_pipeline_1.png)
+![Detection Pipleline](https://github.com/LevinJ/Vehicle-Detection-and-Tracking/blob/master/output_images/img_pipeline_2.png)
 
 This part is implmented in postprocess/mergebox.py
 
